@@ -17,13 +17,18 @@ ELSEIF("${CMAKE_SYSTEM}" MATCHES "Linux")
   FIND_PATH(GLUT_INCLUDE_DIR glut.h HINTS "/usr/include/GL")
 ENDIF()
 
+find_package(GLEW REQUIRED)
+if (GLEW_FOUND)
+    include_directories(${GLEW_INCLUDE_DIRS})
+    link_libraries(${GLEW_LIBRARIES})
+endif()
+
 FIND_PACKAGE(OpenGL REQUIRED)
 
 INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
 
 add_subdirectory(Shader)
 include_directories(Shader)
-
 
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
