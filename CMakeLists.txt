@@ -51,6 +51,7 @@ include_directories(/home/marcelo/Downloads/assimp-4.0.0/include)
 include_directories(/home/marcelo/Downloads/assimp-4.0.0/build/include)
 LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.0/build/code)
 
+set(SOURCE ${SOURCE} model.cpp model.h)
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${PROJECT_SOURCE_DIR}/stb_image.h ${PROJECT_SOURCE_DIR}/container.jpg)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENGL_LIBRARY})
