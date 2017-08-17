@@ -14,6 +14,8 @@ public:
         }
         return cam;
     }
+
+
     glm::mat4 getView(){return view;}
     glm::mat4 getProjection(){return perspective;}
     glm::vec3 getCamPos(){return camPos;}
@@ -33,6 +35,7 @@ private:
     glm::vec3 camPos;
     glm::vec3 upPos;
     glm::vec3 targetPos;
+    void updateView();
 };
 
 #endif // CAMERA_H

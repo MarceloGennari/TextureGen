@@ -119,6 +119,31 @@ void render(){
 
     glutSwapBuffers();
 }
+void keyboardInput(unsigned char key, int x, int y){
+    Camera *cam = Camera::getCam();
+
+    switch(key){
+        case 'w':
+            cam->setCamPos(cam->getCamPos() + glm::vec3(0.0f, 0.0f, -0.1f));
+            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, 0.0f, -0.1f));
+            break;
+        case 'a':
+            cam->setCamPos(cam->getCamPos() + glm::vec3(-0.1f, 0.0f,0.0f));
+            cam->setTargetPos(cam->getTargetPos()+glm::vec3(-0.1f, 0.0f, 0.0f));
+
+            break;
+        case 's':
+            cam->setCamPos(cam->getCamPos() + glm::vec3(0.0f, 0.0f, 0.1f));
+            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, 0.0f, 0.1f));
+            break;
+        case 'd':
+            cam->setCamPos(cam->getCamPos() + glm::vec3(0.1f, 0.0f,0.0f));
+            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.1f, 0.0f, 0.0f));
+            break;
+        default:
+            break;
+    }
+}
 
 int main(int argc, char *argv[])
 {
@@ -137,8 +162,7 @@ int main(int argc, char *argv[])
     Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
                                           Camera::getCam()->getTargetPos(),
                                           Camera::getCam()->getUpPos()));
-
-    glutDisplayFunc(render);
+    glutKeyboardFunc(keyboardInput);
     glutIdleFunc(render);
     glutMainLoop();
     return 0;
