@@ -6,9 +6,12 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "mesh.h"
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
+
+
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
