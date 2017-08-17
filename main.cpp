@@ -10,7 +10,9 @@
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
-
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -73,8 +75,6 @@ void render(){
     std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), fragm.c_str());
 
-    glm::vec3 colour(1.0,0.0,0.0);
-
     /**********
      * Camera
      * ********/
@@ -107,9 +107,6 @@ void render(){
 
     glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE, 5*sizeof(float),(void*)(3*sizeof(float)));
     glEnableVertexAttribArray(1);
-
-
-    //glBindTexture(GL_TEXTURE_2D, texture);
 
     boxTex.use();
     sh.use();

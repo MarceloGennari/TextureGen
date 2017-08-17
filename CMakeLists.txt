@@ -36,6 +36,22 @@ include_directories(Camera)
 include_directories(Texture)
 include_directories(Mesh)
 
+#######################
+# INCLUDE_DIRECTORIES(your/header/dir)
+# LINK_DIRECTORIES(your/library/dir)
+# rosbuild_add_executable(kinectueye src/kinect_ueye.cpp)
+# TARGET_LINK_LIBRARIES(kinectueye lib1 lib2 lib2 ...)
+#
+# This is how to include a .SO library
+# When installing in other PC, keep that in mind and change accordingly
+#########################
+
+
+include_directories(/home/marcelo/Downloads/assimp-4.0.0/include)
+include_directories(/home/marcelo/Downloads/assimp-4.0.0/build/include)
+LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.0/build/code)
+
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${PROJECT_SOURCE_DIR}/stb_image.h ${PROJECT_SOURCE_DIR}/container.jpg)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENGL_LIBRARY})
+target_link_libraries(${PROJECT_NAME} libassimp.so libassimp.so.4)
