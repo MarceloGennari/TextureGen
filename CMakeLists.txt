@@ -29,8 +29,10 @@ INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
 
 add_subdirectory(Shader)
 add_subdirectory(Camera)
+add_subdirectory(Texture)
 include_directories(Shader)
 include_directories(Camera)
+include_directories(Texture)
 
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${PROJECT_SOURCE_DIR}/stb_image.h ${PROJECT_SOURCE_DIR}/container.jpg)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
