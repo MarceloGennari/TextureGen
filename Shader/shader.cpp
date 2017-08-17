@@ -89,27 +89,31 @@ void Shader::use(){
     glUseProgram(programID);
 }
 
-void Shader::setVec4(std::string &name, glm::vec4 &vec){
+void Shader::setVec4(const std::string &name, glm::vec4 &vec){
     GLfloat x = vec.x; GLfloat y = vec.y; GLfloat z = vec.z; GLfloat w = vec.w;
     glUniform4f(glGetUniformLocation(programID, name.c_str()), x, y, z, w);
 }
 
-void Shader::setVec3(std::string &name, glm::vec3 &vec){
+void Shader::setVec3(const std::string &name, glm::vec3 &vec){
     GLfloat x = vec.x; GLfloat y = vec.y; GLfloat z = vec.z;
     glUniform3f(glGetUniformLocation(programID, name.c_str()), x, y, z);
 }
 
-void Shader::setVec2(std::string &name, glm::vec2 &vec){
+void Shader::setVec2(const std::string &name, glm::vec2 &vec){
     GLfloat x = vec.x; GLfloat y = vec.y;
     glUniform2f(glGetUniformLocation(programID, name.c_str()), x, y);
 }
 
-void Shader::setFloat(std::string &name, float un){
+void Shader::setFloat(const std::string &name, float un){
     GLfloat Gun = un;
     glUniform1f(glGetUniformLocation(programID, name.c_str()), Gun);
 }
 
-void Shader::setInt(std::string &name, float in){
+void Shader::setInt(const std::string &name, float in){
     GLfloat Gin = in;
     glUniform1i(glGetUniformLocation(programID, name.c_str()), Gin);
+}
+
+void Shader::setMat4(const std::string &name, glm::mat4 &vec){
+    glUniformMatrix4fv(glGetUniformLocation(programID,name.c_str()),1, GL_FALSE, glm::value_ptr(vec));
 }

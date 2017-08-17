@@ -1,4 +1,4 @@
-set(targetname stlReader)
+set(targetname TextureGen)
 set(SOURCE ${SOURCE}
         ${CMAKE_CURRENT_SOURCE_DIR}/GLSLSources/fragmentshader.fsh
         ${CMAKE_CURRENT_SOURCE_DIR}/GLSLSources/vertexshader.fsh

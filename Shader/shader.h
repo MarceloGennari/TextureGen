@@ -11,11 +11,12 @@ public:
     void use();
 
     // Setter for Uniforms
-    void setVec4(std::string &name, glm::vec4 &vec);
-    void setVec3(std::string &name, glm::vec3 &vec);
-    void setVec2(std::string &name, glm::vec2 &vec);
-    void setFloat(std::string &name, float un);
-    void setInt(std::string &name, float in);
+    void setVec4(const std::string &name, glm::vec4 &vec);
+    void setVec3(const std::string &name, glm::vec3 &vec);
+    void setVec2(const std::string &name, glm::vec2 &vec);
+    void setFloat(const std::string &name, float un);
+    void setInt(const std::string &name, float in);
+    void setMat4(const std::string &name, glm::mat4 &vec);
 
 private:
     unsigned int programID;
