@@ -13,6 +13,7 @@ public:
 private:
     unsigned int ID;
     std::string name;
+    std::string type;
     int width, height, nrChannels;
 };
 

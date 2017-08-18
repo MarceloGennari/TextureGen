@@ -10,6 +10,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "texture.h"
+#include "model.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -28,23 +29,26 @@ void render(){
     glewInit();
 
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // point 1
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // point 2
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // point 2
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // point 3
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // point 4
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // point 5
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // point 6
+
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // point 6
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // point 7
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // point 4
 
         -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
         -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
@@ -52,27 +56,112 @@ void render(){
          0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
          0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
          0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
          0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 
         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
         -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
 
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
          0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
          0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
+    float points[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // point 1
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // point 2
 
-    std::string fragm = "/home/marcelo/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
-    std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // point 3
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // point 4
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // point 5
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // point 6
+
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // point 7
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // point 8
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    };
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0,
+
+        4, 5, 6,
+        6, 7, 4,
+
+        8, 9, 10,
+        10, 11, 8,
+
+        12, 13, 14,
+        14, 15, 12,
+
+        16, 17, 18,
+        18, 19, 16,
+
+        20, 21, 22,
+        22, 23, 20
+    };
+
+    std::vector<Vertex> Vertices;
+    std::vector<unsigned int> Indices;
+    std::vector<TextureS> Textured;
+    TextureS t;
+    t.id = 0;
+    t.type = "texture_diffuse";
+    Textured.push_back(t);
+
+    Vertex v;
+    int index;
+    for(int i = 0; i<24; i++){
+        index = i*5;
+        v.Pos.x = points[index++];
+        v.Pos.y = points[index++];
+        v.Pos.z = points[index++];
+        v.TexCoords.x = points[index++];
+        v.TexCoords.y = points[index++];
+        Vertices.push_back(v);
+    }
+    for(int i =0; i<36; i++){
+        Indices.push_back(indices[i]);
+    }
+
+    Mesh m(Vertices, Indices, Textured);
+
+
+    std::string fragm = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
+    std::string vec = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), fragm.c_str());
 
     /**********
@@ -84,38 +173,45 @@ void render(){
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
 
+    Model test("/home/marcelo/Downloads/darksouls/EliteKnight.stl");
+
+
     /***********
      * Texture
      * *********/
     // load and create a texture
     // -------------------------
-    Texture boxTex("/home/marcelo/TextureGen/container.jpg");
+    //Texture boxTex("/home/marcelo/Desktop/TextureGen/container.jpg");
 
     /**********
      * Object
      * ********/
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+//    unsigned int VBO, VAO;
+//    glGenVertexArrays(1, &VAO);
+//    glBindVertexArray(VAO);
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER,VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);
+//    glGenBuffers(1, &VBO);
+//    glBindBuffer(GL_ARRAY_BUFFER,VBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices),vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+//    glVertexAttribPointer(0,3,GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE, 5*sizeof(float),(void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(1);
+//    glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE, 5*sizeof(float),(void*)(3*sizeof(float)));
+//    glEnableVertexAttribArray(1);
 
-    boxTex.use();
+//    boxTex.use();
     sh.use();
     sh.setMat4("view", view);
     sh.setMat4("model", model);
     sh.setMat4("projection", projection);
-    sh.setInt("brick", 0);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+   // sh.setInt("brick", 0);
+
+//    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+//    m.Draw(sh);
+    test.Draw(sh);
 
     glutSwapBuffers();
 }
@@ -149,7 +245,7 @@ int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
     glewInit();
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE  );
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(600, 600);
     glutCreateWindow("Test");
 

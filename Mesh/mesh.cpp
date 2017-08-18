@@ -9,24 +9,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     setUpMesh();
 }
 
- Mesh::Mesh(float points[], bool Texture, float indices[]){
-//     int size = 3;
-//     if(Texture){
-//        size = size+2;
-//     }
-//     int vertexSize = points.size()/size;
-//     int index = 0;
-//     for(int i = 0; i< vertexSize; i++){
-//         index = i*vertexSize;
-//         this->vertices.push_back(glm::vec3(points[index++], points[index++], points[index++]));
-//         if(Texture){
-//            this->textures.push_back((glm::vec3(points[index++], points[index++])));
-//         }
-//     }
-
-
- }
-
 void Mesh::Draw(Shader shader){
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
@@ -79,4 +61,41 @@ void Mesh::setUpMesh(){
        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
        glBindVertexArray(0);
+}
+
+
+
+Mesh::Mesh(float *points, int size1,  bool Texture, float *indices, int size2){
+    int size = 3;
+    if(Texture){
+       size = size+2;
+    }
+
+    int nrPoints = size1;
+
+    int index = 0;
+    Vertex v;
+    TextureS t;
+    for(int i = 0; i< nrPoints; i++){
+
+        index = i*size1;
+
+        v.Pos = glm::vec3(points[index++], points[index++], points[index++]);
+
+        if(Texture){
+           v.TexCoords = glm::vec2(points[index++], points[index++]);
+        }
+        this->vertices.push_back(v);
+
+    }
+
+    int nrIndices = size2;
+
+    index = 0;
+    for(int i = 0; i<size2; i++){
+        this->indices.push_back(indices[index++]);
+        this->indices.push_back(indices[index++]);
+    }
+
+
 }
