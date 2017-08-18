@@ -110,10 +110,15 @@ void Shader::setFloat(const std::string &name, float un){
 }
 
 void Shader::setInt(const std::string &name, float in){
-    GLfloat Gin = in;
+    GLint Gin = in;
     glUniform1i(glGetUniformLocation(programID, name.c_str()), Gin);
 }
 
 void Shader::setMat4(const std::string &name, glm::mat4 &vec){
     glUniformMatrix4fv(glGetUniformLocation(programID,name.c_str()),1, GL_FALSE, glm::value_ptr(vec));
+}
+
+void Shader::setBool(const std::string &name, bool in){
+    GLint Gin = in;
+    glUniform1i(glGetUniformLocation(programID, name.c_str()), Gin);
 }

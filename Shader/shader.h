@@ -17,7 +17,7 @@ public:
     void setFloat(const std::string &name, float un);
     void setInt(const std::string &name, float in);
     void setMat4(const std::string &name, glm::mat4 &vec);
-
+    void setBool(const std::string& name, bool b);
 private:
     unsigned int programID;
 };

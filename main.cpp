@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "texture.h"
 #include "model.h"
+#include "light.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -23,7 +24,7 @@ using namespace std;
 
 void render(){
 
-    glClearColor(0.5,0.5, 0.5, 1.0);
+    glClearColor(0.1,0.1, 0.1, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -167,7 +168,7 @@ void render(){
      * Camera
      * ********/
     glm::mat4 model;
-    //model = glm::rotate(model,glm::radians(-55.0f), glm::vec3(1.0f,0.0f,0.0f));
+    model = glm::rotate(model,glm::radians(-55.0f), glm::vec3(1.0f,0.0f,0.0f));
 
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
@@ -197,10 +198,17 @@ void render(){
 //    glEnableVertexAttribArray(1);
 
 //    boxTex.use();
+    Light light(glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    glm::vec3 Colour = light.getColor();
+    glm::vec3 lightPos = light.getPos();
+    glm::vec3 Obj = glm::vec3(0.7f, 0.7f, 0.7f);
     sh.use();
     sh.setMat4("view", view);
     sh.setMat4("model", model);
     sh.setMat4("projection", projection);
+    sh.setVec3("lightColour", Colour);
+    sh.setVec3("objectColour", Obj);
+    sh.setVec3("lightPos", lightPos);
 
    // sh.setInt("brick", 0);
 
@@ -215,7 +223,7 @@ void keyboardInput(unsigned char key, int x, int y){
     Camera *cam = Camera::getCam();
     glm::vec3 Pos = cam->getCamPos();
     glm::vec3 diff;
-    float vel = 20;
+    float vel = 3;
     float radius;
     float cYaw;
     float yaw;
@@ -239,7 +247,10 @@ void keyboardInput(unsigned char key, int x, int y){
             cam->setCamPos(cam->getCamPos() + glm::vec3(vel, 0.0f,0.0f));
             cam->setTargetPos(cam->getTargetPos()+glm::vec3(vel, 0.0f, 0.0f));
             break;
-
+        case 'z':
+            cam->setCamPos(cam->getCamPos()+glm::vec3(0.0f, vel, 0.0f));
+            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, vel, 0.0f));
+            break;
         case 'j':
             radius = glm::length(Pos);
             cYaw = asin(Pos.z/radius);
@@ -332,9 +343,9 @@ int main(int argc, char *argv[])
 
     glm::mat4 view;
     Camera::getCam()->setProjection(glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 500.f));
-    Camera::getCam()->setCamPos(glm::vec3(100.0f, 200.0f, 100.0f));
+    Camera::getCam()->setCamPos(glm::vec3(200.0f,220.0f, 200.0f));
     Camera::getCam()->setUpPos(glm::vec3(0.0f, 1.0f, 0.0f));
-    Camera::getCam()->setTargetPos(glm::vec3(0.0f, 0.0f, 0.0f));
+    Camera::getCam()->setTargetPos(glm::vec3(0.0f, 10.0f, 0.0f));
 
     Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
                                           Camera::getCam()->getTargetPos(),

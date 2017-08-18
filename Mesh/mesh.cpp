@@ -31,7 +31,10 @@ void Mesh::Draw(Shader shader){
     glActiveTexture(GL_TEXTURE0);
 
     shader.use();
-
+    if (textures.size()==0)
+        shader.setBool("isTex", 0);
+    else
+        shader.setBool("isTex", 1);
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

@@ -31,10 +31,12 @@ add_subdirectory(Shader)
 add_subdirectory(Camera)
 add_subdirectory(Texture)
 add_subdirectory(Mesh)
+add_subdirectory(Light)
 include_directories(Shader)
 include_directories(Camera)
 include_directories(Texture)
 include_directories(Mesh)
+include_directories(Light)
 
 #######################
 # INCLUDE_DIRECTORIES(your/header/dir)
