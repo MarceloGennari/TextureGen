@@ -26,7 +26,6 @@ void render(){
     glClearColor(1.0,1.0, 1.0, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glewInit();
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
@@ -160,8 +159,8 @@ void render(){
     Mesh m(Vertices, Indices, Textured);
 
 
-    std::string fragm = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
-    std::string vec = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/vertexshader.fsh";
+    std::string fragm = "/home/marcelo/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
+    std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), fragm.c_str());
 
     /**********
@@ -172,9 +171,6 @@ void render(){
 
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
-
-    Model test("/home/marcelo/Downloads/darksouls/EliteKnight.stl");
-
 
     /***********
      * Texture
@@ -211,7 +207,7 @@ void render(){
 //    glDrawArrays(GL_TRIANGLES, 0, 36);
 
 //    m.Draw(sh);
-    test.Draw(sh);
+    Model::getModel()->Draw(sh);
 
     glutSwapBuffers();
 }
@@ -244,22 +240,28 @@ void keyboardInput(unsigned char key, int x, int y){
 int main(int argc, char *argv[])
 {
     glutInit(&argc, argv);
+    glewExperimental = GL_TRUE;
     glewInit();
+
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(600, 600);
     glutCreateWindow("Test");
+    glutKeyboardFunc(keyboardInput);
+    glutIdleFunc(render);
 
     glm::mat4 view;
     Camera::getCam()->setProjection(glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.f));
-    Camera::getCam()->setCamPos(glm::vec3(1.0f, 1.0f, 3.0f));
+    Camera::getCam()->setCamPos(glm::vec3(0.0f, 30.0f, 3.0f));
     Camera::getCam()->setUpPos(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::getCam()->setTargetPos(glm::vec3(0.0f, 0.0f, 0.0f));
 
     Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
                                           Camera::getCam()->getTargetPos(),
                                           Camera::getCam()->getUpPos()));
-    glutKeyboardFunc(keyboardInput);
-    glutIdleFunc(render);
+
+    //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
+    Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
+
     glutMainLoop();
     return 0;
 }

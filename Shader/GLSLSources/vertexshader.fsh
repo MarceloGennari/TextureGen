@@ -1,8 +1,9 @@
-#version 310 es
+#version 410 core
 
-precision mediump float;
+//precision mediump float;
 layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec2 texCoord;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 texCoord;
 
 uniform mat4 model;
 uniform mat4 view;

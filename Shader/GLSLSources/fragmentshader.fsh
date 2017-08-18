@@ -1,13 +1,15 @@
-#version 310 es
+#version 410 core
 
-precision mediump float;
+//precision mediump float;
 out vec4 FragColor;
 
 in vec2 atexCoord;
 
 uniform sampler2D texture1;
 
+
 void main()
 {
-    FragColor = texture(texture1, atexCoord);
+    FragColor = vec4(0.3f, 0.3f, 0.3f, 1.0f);
+    //FragColor = texture(texture1, atexCoord);
 }

@@ -12,19 +12,24 @@ class Model
 {
 public:
      /*  Functions   */
-     Model(char *path)
-     {
-         loadModel(path);
+     Model();
+     static Model* getModel(){
+         if(m == NULL){
+             m = new Model();
+         }
+         return m;
      }
      void Draw(Shader shader);
+     void loadModel(std::string path);
  private:
+     static Model* m;
+
      /*  Model Data  */
      std::vector<Mesh> meshes;
      std::string directory;
      std::vector<TextureS> textures_loaded;
 
      /*  Functions   */
-     void loadModel(std::string path);
      void processNode(aiNode *node, const aiScene *scene);
      Mesh processMesh(aiMesh *mesh, const aiScene *scene);
      std::vector<TextureS> loadMaterialTextures(aiMaterial *mat, aiTextureType type,

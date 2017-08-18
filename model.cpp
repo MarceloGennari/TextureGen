@@ -1,6 +1,10 @@
 #include "model.h"
 #include <iostream>
 
+Model* Model::m;
+
+Model::Model(){}
+
 void Model::Draw(Shader shader){
     for(unsigned int i = 0; i < meshes.size(); i++)
     meshes[i].Draw(shader);
@@ -116,6 +120,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
+
     return Mesh(vertices, indices, textures);
 }
 
@@ -153,6 +158,7 @@ std::vector<TextureS> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType
 
 unsigned int Model::TextureFromFile(const char *path, const std::string &directory)
 {
+    glewInit();
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
 

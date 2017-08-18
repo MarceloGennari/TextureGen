@@ -1,12 +1,12 @@
 #include "mesh.h"
-
+#include <iostream>
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureS> textures)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
 
-    setUpMesh();
+    this->setUpMesh();
 }
 
 void Mesh::Draw(Shader shader){
@@ -30,6 +30,8 @@ void Mesh::Draw(Shader shader){
     }
     glActiveTexture(GL_TEXTURE0);
 
+    shader.use();
+
     // draw mesh
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -37,9 +39,15 @@ void Mesh::Draw(Shader shader){
 }
 
 void Mesh::setUpMesh(){
-       glGenVertexArrays(1, &VAO);
-       glGenBuffers(1, &VBO);
-       glGenBuffers(1, &EBO);
+        glewInit();
+       unsigned int A, B, E;
+       glGenVertexArrays(1, &A);
+       glGenBuffers(1, &B);
+       glGenBuffers(1, &E);
+
+       this->VAO = A;
+       this->VBO = B;
+       this->EBO = E;
 
        glBindVertexArray(VAO);
        glBindBuffer(GL_ARRAY_BUFFER, VBO);
