@@ -28,6 +28,9 @@ public:
     void setUpPos(glm::vec3 upPos);
     void setTargetPos(glm::vec3 targetPos);
 
+    int lastX, lastY;
+    float yaw, pitch;
+
 private:
     static Camera* cam;
     glm::mat4 view;
