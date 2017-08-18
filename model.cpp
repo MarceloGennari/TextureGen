@@ -1,5 +1,6 @@
 #include "model.h"
 #include <iostream>
+#include <algorithm>
 
 Model* Model::m;
 
@@ -7,7 +8,44 @@ Model::Model(){}
 
 void Model::Draw(Shader shader){
     for(unsigned int i = 0; i < meshes.size(); i++)
-    meshes[i].Draw(shader);
+        meshes[i].Draw(shader);
+
+    /* Notice that when the File is .stl, there will be loads of repeated vertices.
+     * This is because stl doesn't use EBOs
+     * So the next function tries to rectify this by assigning the right indices to the right vertices.
+     * **/
+
+    //unRepVert();
+    //PairSelection();
+}
+
+void Model::unRepVert(){
+    std::vector <Vertex> vs;
+    std::vector <unsigned int> ind;
+    std::vector <Vertex> newVs;
+    std::vector <unsigned int> repeatedVs;
+
+        vs = meshes[0].vertices;
+        ind = meshes[0].indices;
+
+    std::cout <<vs.size() << std::endl;
+
+    int count=0;
+
+    for(unsigned int i = 0; i<vs.size(); i++){
+
+        for(unsigned int j=i+1; j<vs.size(); j++){
+            if(glm::length(vs[i].Pos - vs[j].Pos)==0){
+                repeatedVs.push_back(j);
+         }
+    }
+
+    std::cout<< count << std::endl;
+}
+}
+void Model::PairSelection(){
+
+
 }
 
 void Model::loadModel(std::string path){

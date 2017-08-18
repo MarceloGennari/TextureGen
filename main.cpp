@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
     Camera::getCam()->pitch = 0;
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
-    Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
+    Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
 
     glutMainLoop();
     return 0;

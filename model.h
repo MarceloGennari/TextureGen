@@ -35,6 +35,8 @@ public:
      std::vector<TextureS> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                           std::string typeName);
      unsigned int TextureFromFile(const char *path, const std::string &directory);
+     void PairSelection();
+     void unRepVert();
 };
 
 #endif // MODEL_H
