@@ -7,41 +7,50 @@ Model* Model::m;
 Model::Model(){}
 
 void Model::Draw(Shader shader){
+
+
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].Draw(shader);
 
-    /* Notice that when the File is .stl, there will be loads of repeated vertices.
-     * This is because stl doesn't use EBOs
-     * So the next function tries to rectify this by assigning the right indices to the right vertices.
-     * **/
 
-    //unRepVert();
+
     //PairSelection();
 }
 
-void Model::unRepVert(){
-    std::vector <Vertex> vs;
-    std::vector <unsigned int> ind;
+void Model::unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+    /*
+     * The idea of this algorithm is:
+     * we iterate from 0 to the size of the vector and compare each other
+     * if we find two that are equal, we substitute that one in the EBO
+     * the "continue" part is in case we try to check the same vertix again.
+     * the i-count is because the vertex 300 in the old scheme is going to become 300-count where count is the number of vertices that were taken out
+   */
+    std::vector <unsigned int> newInd;
     std::vector <Vertex> newVs;
     std::vector <unsigned int> repeatedVs;
 
-        vs = meshes[0].vertices;
-        ind = meshes[0].indices;
-
-    std::cout <<vs.size() << std::endl;
-
-    int count=0;
-
+    newInd = ind;
     for(unsigned int i = 0; i<vs.size(); i++){
+        if(std::find(repeatedVs.begin(), repeatedVs.end(), i) != repeatedVs.end() ){
+            continue;
+        }
+        newVs.push_back(vs[i]);
+        newInd[i] = newVs.size()-1;
 
         for(unsigned int j=i+1; j<vs.size(); j++){
-            if(glm::length(vs[i].Pos - vs[j].Pos)==0){
-                repeatedVs.push_back(j);
-         }
+            // Apparently there are vertices with the same position but different normal values
+            // Since the code wants vertex at same position (and since we can calculate normals in the geometry shader)
+            // I am going to stick with the "same vertex position" approach
+                if(vs[i].Pos == vs[j].Pos /*&& vs[i].Normal == vs[j].Normal*/){
+                    repeatedVs.push_back(j);
+                    newInd[j] = newVs.size()-1;
+                }
+        }
     }
 
-    std::cout<< count << std::endl;
-}
+    vs = newVs;
+    ind = newInd;
+
 }
 void Model::PairSelection(){
 
@@ -158,6 +167,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
+
+    /* Notice that when the File is .stl, there will be loads of repeated vertices.
+     * This is because stl doesn't use EBOs
+     * So the next function tries to rectify this by assigning the right indices to the right vertices.
+     * **/
+    unRepVert(vertices, indices);
 
     return Mesh(vertices, indices, textures);
 }

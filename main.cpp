@@ -160,15 +160,15 @@ void render(){
     Mesh m(Vertices, Indices, Textured);
 
 
-    std::string fragm = "/home/marcelo/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
-    std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
+    std::string fragm = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
+    std::string vec = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), fragm.c_str());
 
     /**********
      * Camera
      * ********/
     glm::mat4 model;
-    model = glm::rotate(model,glm::radians(-55.0f), glm::vec3(1.0f,0.0f,0.0f));
+    model = glm::rotate(model,glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
 
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
@@ -219,114 +219,6 @@ void render(){
 
     glutSwapBuffers();
 }
-void keyboardInput(unsigned char key, int x, int y){
-    Camera *cam = Camera::getCam();
-    glm::vec3 Pos = cam->getCamPos();
-    glm::vec3 diff;
-    float vel = 3;
-    float radius;
-    float cYaw;
-    float yaw;
-    float cTheta;
-    float theta;
-    switch(key){
-        case 'w':
-            cam->setCamPos(cam->getCamPos() + glm::vec3(0.0f, 0.0f, -vel));
-            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, 0.0f, -vel));
-            break;
-        case 'a':
-            cam->setCamPos(cam->getCamPos() + glm::vec3(-vel, 0.0f,0.0f));
-            cam->setTargetPos(cam->getTargetPos()+glm::vec3(-vel, 0.0f, 0.0f));
-
-            break;
-        case 's':
-            cam->setCamPos(cam->getCamPos() + glm::vec3(0.0f, 0.0f, vel));
-            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, 0.0f, vel));
-            break;
-        case 'd':
-            cam->setCamPos(cam->getCamPos() + glm::vec3(vel, 0.0f,0.0f));
-            cam->setTargetPos(cam->getTargetPos()+glm::vec3(vel, 0.0f, 0.0f));
-            break;
-        case 'z':
-            cam->setCamPos(cam->getCamPos()+glm::vec3(0.0f, vel, 0.0f));
-            cam->setTargetPos(cam->getTargetPos()+glm::vec3(0.0f, vel, 0.0f));
-            break;
-        case 'j':
-            radius = glm::length(Pos);
-            cYaw = asin(Pos.z/radius);
-            cTheta = acos(Pos.x/(radius*cos(cYaw)));
-            theta = 0.01f;
-
-            diff.x = radius*cos(cYaw)*cos(cTheta+theta);
-            diff.y = radius*cos(cYaw)*sin(cTheta+theta);
-            diff.z = radius*sin(cYaw);
-            cam->setCamPos(diff);
-            break;
-        case 'k':
-            radius = glm::length(Pos);
-            cYaw = asin(Pos.z/radius);
-            cTheta = acos(Pos.x/(radius*cos(cYaw)));
-            yaw = 0.01f;
-
-            diff.x = radius*cos(cYaw+yaw)*cos(cTheta);
-            diff.y = radius*cos(cYaw+yaw)*sin(cTheta);
-            diff.z = radius*sin(cYaw+yaw);
-            cam->setCamPos(diff);
-            break;
-        case 'i':
-            radius = glm::length(Pos);
-            cYaw = asin(Pos.z/radius);
-            cTheta = acos(Pos.x/(radius*cos(cYaw)));
-            yaw = 0.01f;
-
-            diff.x = radius*cos(cYaw-yaw)*cos(cTheta);
-            diff.y = radius*cos(cYaw-yaw)*sin(cTheta);
-            diff.z = radius*sin(cYaw-yaw);
-            cam->setCamPos(diff);
-            break;
-        case 'l':
-            radius = glm::length(Pos);
-            cYaw = asin(Pos.z/radius);
-            cTheta = acos(Pos.x/(radius*cos(cYaw)));
-            theta = 0.01f;
-
-            diff.x = radius*cos(cYaw)*cos(cTheta-theta);
-            diff.y = radius*cos(cYaw)*sin(cTheta-theta);
-            diff.z = radius*sin(cYaw);
-            cam->setCamPos(diff);
-            break;
-        default:
-            break;
-    }
-}
-void mouseInput(int button, int state, int x, int y){
-    if(button == GLUT_LEFT_BUTTON){
-        Camera* cam = Camera::getCam();
-        int offsetX = x - cam->lastX;
-        int offsetY = y - cam->lastY;
-        cam->lastX = x;
-        cam->lastY = y;
-
-
-        float sensitivity = 0.5;
-        offsetX *= sensitivity;
-        offsetY *= sensitivity;
-
-        cam->yaw   += offsetX;
-        cam->pitch += offsetY;
-
-        if(cam->pitch > 89.0f)
-            cam->pitch = 89.0f;
-        if(cam->pitch < -89.0f)
-            cam->pitch = -89.0f;
-
-        glm::vec3 front;
-        front.x = cos(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-        front.y = sin(glm::radians(cam->pitch));
-        front.z = sin(glm::radians(cam->yaw)) * cos(glm::radians(cam->pitch));
-        cam->setUpPos(glm::normalize(front));
-    }
-}
 
 int main(int argc, char *argv[])
 {
@@ -337,13 +229,12 @@ int main(int argc, char *argv[])
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(600, 600);
     glutCreateWindow("Test");
-    glutKeyboardFunc(keyboardInput);
-    glutMouseFunc(mouseInput);
+    glutKeyboardFunc(Camera::keyBoardInput);
+    glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-    glm::mat4 view;
     Camera::getCam()->setProjection(glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 500.f));
-    Camera::getCam()->setCamPos(glm::vec3(200.0f,220.0f, 200.0f));
+    Camera::getCam()->setCamPos(glm::vec3(0.0f,0.0f, 200.0f));
     Camera::getCam()->setUpPos(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::getCam()->setTargetPos(glm::vec3(0.0f, 10.0f, 0.0f));
 
@@ -356,7 +247,7 @@ int main(int argc, char *argv[])
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
-
+    //Model::getModel()->loadModel("/home/marcelo/Downloads/darksouls/EliteKnight.stl");
     glutMainLoop();
     return 0;
 }

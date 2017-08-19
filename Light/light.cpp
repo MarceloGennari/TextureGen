@@ -48,7 +48,7 @@ Light::Light(glm::vec3 Pos, glm::vec3 colour)
 
     this->Pos = Pos;
     this->colour = colour;
-    this->sh = new Shader("/home/marcelo/TextureGen/Light/lightvs.vert","/home/marcelo/TextureGen/Light/lightfs.frag");
+    //this->sh = new Shader("/home/marcelo/TextureGen/Light/lightvs.vert","/home/marcelo/TextureGen/Light/lightfs.frag");
 }
 
 glm::vec3 Light::getColor(){

@@ -3,17 +3,21 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-
+#include "glm/gtx/rotate_vector.hpp"
+#include "GL/freeglut.h"
 class Camera
 {
 public:
-    Camera();
+    Camera(){}
     static Camera* getCam(){
         if(cam == NULL){
             cam = new Camera();
         }
         return cam;
     }
+
+    void static keyBoardInput(unsigned char key, int x, int y);
+    void static mouseInput(int button, int state, int x, int y);
 
 
     glm::mat4 getView(){return view;}

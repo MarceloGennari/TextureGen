@@ -36,7 +36,7 @@ public:
                                           std::string typeName);
      unsigned int TextureFromFile(const char *path, const std::string &directory);
      void PairSelection();
-     void unRepVert();
+     void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
 };
 
 #endif // MODEL_H
