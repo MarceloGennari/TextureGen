@@ -11,7 +11,15 @@
 struct Pair{
     std::pair<unsigned int, unsigned int> vecPair;
     Vertex contVert;
+    glm::mat4 Q;
     float cost;
+};
+struct less_than_cost
+{
+    inline bool operator() (const Pair& struct1, const Pair& struct2)
+    {
+        return (struct1.cost < struct2.cost);
+    }
 };
 
 class Model
@@ -43,7 +51,9 @@ public:
      unsigned int TextureFromFile(const char *path, const std::string &directory);
      std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
      void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
+     std::vector<glm::mat4> calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
      void Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
+     std::vector<Pair> formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q);
 };
 
 #endif // MODEL_H

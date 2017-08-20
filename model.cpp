@@ -1,6 +1,8 @@
 #include "model.h"
 #include <iostream>
 #include <algorithm>
+#include <iterator>
+#include <glm/glm.hpp>
 
 Model* Model::m;
 
@@ -12,9 +14,6 @@ void Model::Draw(Shader shader){
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].Draw(shader);
 
-
-
-    //PairSelection();
 }
 
 void Model::unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
@@ -85,10 +84,77 @@ void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind
 
 
         unRepVert(vs, ind);
+        std::vector<glm::mat4> ListQ = calcQMatrices(vs, ind);
         std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
-        // Note that pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
+        std::vector<Pair> Pairs = formPairList(vs,pairs, ListQ);
+        // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
         // Where faces = ind.size()/3 and vertices is just vs.size()
+        std::cout << "success" << std::endl;
 
+
+}
+
+std::vector<Pair> Model::formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q){
+
+    std::vector<Pair> Pairs;
+    for(unsigned int k= 0; k<pairs.size(); k++){
+        Pair p;
+        p.vecPair = pairs[k];
+        p.Q = Q[p.vecPair.first]+Q[p.vecPair.second];
+        //if invertible
+        p.contVert.Pos = glm::vec3(glm::inverse(p.Q)*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+        glm::vec4 pl = glm::vec4(p.contVert.Pos, 1.0f) * p.Q ;
+        float cost = glm::dot(pl, glm::vec4(p.contVert.Pos, 1.0f));
+        p.cost = cost;
+
+        Pairs.push_back(p);
+    }
+    std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
+    std::cout << "success" << std::endl;
+}
+
+std::vector<glm::mat4> Model::calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+
+    std::vector<glm::vec4> P;
+    std::vector<glm::mat4> ListKp;
+    for(unsigned int k = 0; k<ind.size(); k++){
+        // Calculate P for each plane (set of three vertices)
+        glm::vec3 v1 = vs[ind[k++]].Pos;
+        glm::vec3 v2 = vs[ind[k++]].Pos;
+        glm::vec3 v3 = vs[ind[k]].Pos;
+        // Notice that ax + by + cz + d = 0 for p = <a,b,c> is such that <a,b,c> is the vector normal to the plane
+        glm::vec3 normal = glm::normalize(glm::cross(v1-v3,v2-v3)); // this is <a,b,c>
+        float d = -glm::dot(v3, normal);
+        P.push_back(glm::vec4(normal, d));
+
+    }
+    for(unsigned int k = 0; k<vs.size(); k++){
+        // Find all planes for Vertex k
+        unsigned int i = 0;
+        std::vector<glm::vec4> Planes;
+        while (i < ind.size())
+        {
+            if(k == ind[i]){
+                unsigned w = i%3;
+                Planes.push_back(P[w]);
+            }
+            i++;
+        }
+        // Sum all Kp for that Vertex to get Q
+        glm::mat4 Kp;
+        bool first = true;
+        for(unsigned t =0; t<Planes.size(); t++){
+            if(first){
+                Kp = glm::outerProduct(Planes[t], Planes[t]);
+            }else{
+                Kp = Kp + glm::outerProduct(Planes[t], Planes[t]);
+            }
+            first = false;
+        }
+        ListKp.push_back(Kp);
+    }
+    return ListKp;
 }
 
 void Model::loadModel(std::string path){

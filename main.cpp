@@ -28,55 +28,6 @@ void render(){
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // point 1
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // point 2
-
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // point 2
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // point 3
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // point 4
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // point 5
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // point 6
-
-        0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // point 6
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // point 7
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // point 4
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-
-        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
     float points[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // point 0
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // point 1
@@ -161,8 +112,9 @@ void render(){
 
 
     std::string fragm = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
+    std::string geom = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/geometryshader.vert";
     std::string vec = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/vertexshader.fsh";
-    Shader sh(vec.c_str(), fragm.c_str());
+    Shader sh(vec.c_str(), geom.c_str(), fragm.c_str());
 
     /**********
      * Camera
