@@ -8,6 +8,12 @@
 #include <assimp/postprocess.h>
 #include "stb_image.h"
 
+struct Pair{
+    std::pair<unsigned int, unsigned int> vecPair;
+    Vertex contVert;
+    float cost;
+};
+
 class Model
 {
 public:
@@ -35,8 +41,9 @@ public:
      std::vector<TextureS> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                           std::string typeName);
      unsigned int TextureFromFile(const char *path, const std::string &directory);
-     void PairSelection();
+     std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
      void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
+     void Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
 };
 
 #endif // MODEL_H

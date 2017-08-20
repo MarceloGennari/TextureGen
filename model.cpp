@@ -52,8 +52,42 @@ void Model::unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     ind = newInd;
 
 }
-void Model::PairSelection(){
+std::vector<std::pair<unsigned int, unsigned int> > Model::PairSelection(std::vector<unsigned int> &ind){
 
+    std::vector<std::pair<unsigned int, unsigned int> > pairs;
+    unsigned int v1;
+    unsigned int v2;
+    unsigned int v3;
+    unsigned k;
+    for(k = 0; k<ind.size(); k++){
+        v1 = ind[k++]; v2 = ind[k++]; v3=ind[k];
+
+        if(std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v1, v2)) != pairs.end() ||
+                std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v2, v1)) != pairs.end() ){
+        } else {
+         pairs.push_back(std::pair<unsigned int, unsigned int>(v1,v2));
+        }
+        if(std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v1, v3)) != pairs.end() ||
+            std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v3, v1)) != pairs.end()){
+        } else {
+            pairs.push_back(std::pair<unsigned int, unsigned int>(v1,v3));
+        }
+        if(std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v3, v2)) != pairs.end() ||
+            std::find(pairs.begin(), pairs.end(),std::pair<unsigned int, unsigned int>(v2, v3)) != pairs.end() ){
+        } else{
+            pairs.push_back(std::pair<unsigned int, unsigned int>(v2,v3));
+        }
+    }
+    return pairs;
+}
+
+void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+
+
+        unRepVert(vs, ind);
+        std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
+        // Note that pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
+        // Where faces = ind.size()/3 and vertices is just vs.size()
 
 }
 
@@ -172,7 +206,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
      * This is because stl doesn't use EBOs
      * So the next function tries to rectify this by assigning the right indices to the right vertices.
      * **/
-    unRepVert(vertices, indices);
+    Optimization(vertices, indices);
 
     return Mesh(vertices, indices, textures);
 }
