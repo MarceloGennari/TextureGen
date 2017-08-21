@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 Model* Model::m;
 
@@ -91,6 +92,113 @@ void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind
         // Where faces = ind.size()/3 and vertices is just vs.size()
         std::cout << "success" << std::endl;
 
+        while(vs.size()>2000){
+            changeVert(Pairs, vs, ind, ListQ);
+            //Notice that after that, the number of Pairs should go down by at least 3
+            //However, I am not taking into account the Pairs that are repeated
+            //There are two Pairs that are repeated for every iteration
+            //I can't be bothered to take care of that now, but this needs to be fixed
+             std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
+        }
+        std::cout<< "success" << std::endl;
+}
+
+void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
+        unsigned int v1 = Pairs[0].vecPair.first;
+        unsigned int v2 = Pairs[0].vecPair.second;
+        unsigned int v_dashInd;
+        unsigned int v_remove;
+        std::vector<unsigned int> commonVs;
+        Vertex v_dash = Pairs[0].contVert;
+        glm::mat4 v_dashQ = Pairs[0].Q;
+        // Select vertex with smallest index in ind and change it to v_dash
+        if(v1>v2){
+            v_dashInd = v2;
+            v_remove = v1;
+        }
+        else{
+            v_dashInd = v1;
+            v_remove = v2;
+        }
+        vs[v_dashInd] = v_dash;
+
+        // Remove the vertex with the biggest index in vs
+        vs.erase(vs.begin() + v_remove);
+        // Update listQ
+        listQ.erase(listQ.begin() + v_remove);
+        listQ[v_dashInd] = v_dashQ;
+
+        // Change all the indeces of the ind (they all displaced by one) in the ind and remove the face that had both v1 and v2
+        for(unsigned int w = 0; w<ind.size(); w+=3){
+            unsigned int ind1 = ind[w];
+            unsigned int ind2 = ind[w+1];
+            unsigned int ind3 = ind[w+2];
+
+            // Delete Faces that had both vertices as an edge
+            if((v1==ind1||v1==ind2||v1==ind3)&&(v2==ind1||v2==ind2||v2==ind3)){
+                ind.erase(ind.begin() + w, ind.begin() + w+3);
+                w-=3;
+                continue;
+            }
+
+            if(ind1>=v_remove){
+                ind[w] = ind[w] -1;
+            }
+            if(ind2>=v_remove){
+                ind[w+1] = ind[w+1] -1;
+            }
+            if(ind3>=v_remove){
+                ind[w+2] = ind[w+2] -1;
+            }
+        }
+        // Update Pairs Vector
+        Pairs.erase(Pairs.begin());
+        for(unsigned int w=0; w<Pairs.size(); w++){
+            // From now on, the Pairs can have 4 cases:
+            // 1. It has the vertex that was erased as first element
+            // 2. It has the vertex that was erased as second element
+            // 3. It has the vertex that was substituted as first element
+            // 4. It has the vertex that was substituted as second element
+            // The update for the first and third case is the same
+            // The update for the second and fourth case is the same
+            unsigned int fv = Pairs[w].vecPair.first;
+            unsigned int sv = Pairs[w].vecPair.second;
+            // Case 1:
+            if(fv == v_remove||fv== v_dashInd){
+                Pair p;
+                std::pair<unsigned int, unsigned int> k(v_dashInd, sv);
+                if(sv>v_remove) // If the second vertex is bigger than v_remove, update it
+                    --sv;
+                p.vecPair = k;
+                p.contVert.Pos = vs[v_dashInd].Pos + vs[sv].Pos;
+                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+                p.Q = listQ[sv] + v_dashQ;
+                //This is a v^t*Q*v Operation
+                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
+                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
+                p.cost = cost;
+                Pairs[w] = p;
+                continue;
+            }
+            // Case 2:
+            if(sv == v_remove || sv == v_dashInd){
+                Pair p;
+                std::pair<unsigned int, unsigned int> k(v_dashInd, fv);
+                if(fv>v_remove) // If the second vertex is bigger than v_remove, update it
+                    --fv;
+                p.vecPair = k;
+                p.contVert.Pos = vs[v_dashInd].Pos + vs[fv].Pos;
+                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+                p.Q = listQ[fv] + v_dashQ;
+
+                //This is a v^t*Q*v Operation
+                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
+                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
+                p.cost = cost;
+                Pairs[w] = p;
+                continue;
+            }
+            }
 
 }
 
@@ -102,16 +210,27 @@ std::vector<Pair> Model::formPairList(std::vector<Vertex> &vs, std::vector<std::
         p.vecPair = pairs[k];
         p.Q = Q[p.vecPair.first]+Q[p.vecPair.second];
         //if invertible
-        p.contVert.Pos = glm::vec3(glm::inverse(p.Q)*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+        /* SOLVE THE MINIMUM SQUARE METHOD
+         * Not working at the moment and I cannot be bothered to figure out why not
+         * Postpone it a bit
+         * */
+//        const float *y = (const float*)glm::value_ptr(p.Q);
+//        float l[16] = {y[0], y[1], y[2],y[3], y[4], y[5], y[6], y[7], y[8],y[9], y[10], y[11], 0.0f, 0.0f, 0.0f, 1.0f};
+//        glm::mat4 Opt = glm::make_mat4(l);
+//        glm::vec4 v_dash = glm::inverse(Opt)*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//        v_dash = glm::vec4(v_dash.x/v_dash.w, v_dash.y/v_dash.w, v_dash.z/v_dash.w, v_dash.w/v_dash.w);
+        p.contVert.Pos = (vs[p.vecPair.first].Pos + vs[p.vecPair.second].Pos);
+        p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2, p.contVert.Pos.y/2, p.contVert.Pos.z/2);
 
         glm::vec4 pl = glm::vec4(p.contVert.Pos, 1.0f) * p.Q ;
-        float cost = glm::dot(pl, glm::vec4(p.contVert.Pos, 1.0f));
+        long double cost = glm::dot(pl, glm::vec4(p.contVert.Pos, 1.0f));
         p.cost = cost;
 
         Pairs.push_back(p);
     }
     std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
-    std::cout << "success" << std::endl;
+
+    return Pairs;
 }
 
 std::vector<glm::mat4> Model::calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
