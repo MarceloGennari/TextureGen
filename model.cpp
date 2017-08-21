@@ -80,7 +80,6 @@ std::vector<std::pair<unsigned int, unsigned int> > Model::PairSelection(std::ve
     }
     return pairs;
 }
-
 void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
 
 
@@ -92,7 +91,7 @@ void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind
         // Where faces = ind.size()/3 and vertices is just vs.size()
         std::cout << "success" << std::endl;
 
-        while(vs.size()>2000){
+        while(vs.size()>2200){
             changeVert(Pairs, vs, ind, ListQ);
             //Notice that after that, the number of Pairs should go down by at least 3
             //However, I am not taking into account the Pairs that are repeated
@@ -137,20 +136,43 @@ void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::v
             // Delete Faces that had both vertices as an edge
             if((v1==ind1||v1==ind2||v1==ind3)&&(v2==ind1||v2==ind2||v2==ind3)){
                 ind.erase(ind.begin() + w, ind.begin() + w+3);
+                if(ind1!=v1 && ind1 != v2)
+                    commonVs.push_back(ind1);
+                if(ind2!=v1 && ind2 != v2)
+                    commonVs.push_back(ind2);
+                if(ind3!=v1 && ind3 != v2)
+                    commonVs.push_back(ind3);
                 w-=3;
                 continue;
             }
 
             if(ind1>=v_remove){
-                ind[w] = ind[w] -1;
+                if(ind1 == v_remove){
+                    ind[w] =v_dashInd;
+                } else{
+                    ind[w] = ind[w] -1;
+                }
             }
             if(ind2>=v_remove){
-                ind[w+1] = ind[w+1] -1;
+                if(ind2 == v_remove){
+                    ind[w+1] =v_dashInd;
+                } else{
+                    ind[w+1] = ind[w+1] -1;
+                }
             }
             if(ind3>=v_remove){
-                ind[w+2] = ind[w+2] -1;
+                if(ind3== v_remove){
+                    ind[w+2] =v_dashInd;
+                } else{
+                    ind[w+2] = ind[w+2] -1;
+                }
             }
         }
+        for(int k =0; k<commonVs.size(); k++){
+            if(commonVs[k]>v_remove)
+                commonVs[k]--;
+        }
+
         // Update Pairs Vector
         Pairs.erase(Pairs.begin());
         for(unsigned int w=0; w<Pairs.size(); w++){
@@ -172,6 +194,8 @@ void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::v
                 p.vecPair = k;
                 p.contVert.Pos = vs[v_dashInd].Pos + vs[sv].Pos;
                 p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
+                p.contVert.Normal = glm::normalize(p.contVert.Normal);
                 p.Q = listQ[sv] + v_dashQ;
                 //This is a v^t*Q*v Operation
                 glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
@@ -189,6 +213,8 @@ void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::v
                 p.vecPair = k;
                 p.contVert.Pos = vs[v_dashInd].Pos + vs[fv].Pos;
                 p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
+                p.contVert.Normal = glm::normalize(p.contVert.Normal);
                 p.Q = listQ[fv] + v_dashQ;
 
                 //This is a v^t*Q*v Operation
@@ -198,7 +224,36 @@ void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::v
                 Pairs[w] = p;
                 continue;
             }
+            if(sv>v_remove){
+                Pairs[w].vecPair.second--;
             }
+            if(fv>v_remove){
+                Pairs[w].vecPair.first--;
+            }
+        }
+
+        for(unsigned int w=0; w<Pairs.size(); w++){
+            unsigned int first = Pairs[w].vecPair.first;
+            unsigned int second = Pairs[w].vecPair.second;
+            for(unsigned int k = 0; k<commonVs.size(); k++){
+                if(first == commonVs[k]){
+                    commonVs.erase(commonVs.begin()+k);
+                    Pairs.erase(Pairs.begin() + w);
+                }
+                if(second == commonVs[k]){
+                    commonVs.erase(commonVs.begin()+k);
+                    Pairs.erase(Pairs.begin() + w);
+                }
+            }
+            if(commonVs.size() ==0){
+                break;
+            }
+        }
+        // Check when pairs have the same "face"
+
+
+//        std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
+//        Pairs = formPairList(vs,pairs, listQ);
 
 }
 
@@ -215,14 +270,17 @@ std::vector<Pair> Model::formPairList(std::vector<Vertex> &vs, std::vector<std::
          * Postpone it a bit
          * */
 //        const float *y = (const float*)glm::value_ptr(p.Q);
-//        float l[16] = {y[0], y[1], y[2],y[3], y[4], y[5], y[6], y[7], y[8],y[9], y[10], y[11], 0.0f, 0.0f, 0.0f, 1.0f};
+//        float l[16] = {y[0], y[1], y[2],y[3], y[4], y[5], y[6], y[7], y[8],y[9], y[10], y[11],  y[12],y[13], y[14], y[15]};
 //        glm::mat4 Opt = glm::make_mat4(l);
 //        glm::vec4 v_dash = glm::inverse(Opt)*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 //        v_dash = glm::vec4(v_dash.x/v_dash.w, v_dash.y/v_dash.w, v_dash.z/v_dash.w, v_dash.w/v_dash.w);
         p.contVert.Pos = (vs[p.vecPair.first].Pos + vs[p.vecPair.second].Pos);
         p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2, p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+        p.contVert.Normal = (vs[p.vecPair.first].Normal + vs[p.vecPair.second].Normal);
+        p.contVert.Normal = glm::normalize(p.contVert.Normal);
 
-        glm::vec4 pl = glm::vec4(p.contVert.Pos, 1.0f) * p.Q ;
+        glm::vec4 m = glm::vec4(p.contVert.Pos, 1.0f);
+        glm::vec4 pl = m*glm::mat4(p.Q);
         long double cost = glm::dot(pl, glm::vec4(p.contVert.Pos, 1.0f));
         p.cost = cost;
 
@@ -237,6 +295,9 @@ std::vector<glm::mat4> Model::calcQMatrices(std::vector<Vertex> &vs, std::vector
 
     std::vector<glm::vec4> P;
     std::vector<glm::mat4> ListKp;
+
+    // Calculate the planes that define each face in the form vec4 (a,b,c,d) so that
+    // ax + by + cz + d = 0, which defines a plane in (x,y,z)
     for(unsigned int k = 0; k<ind.size(); k++){
         // Calculate P for each plane (set of three vertices)
         glm::vec3 v1 = vs[ind[k++]].Pos;
@@ -248,6 +309,8 @@ std::vector<glm::mat4> Model::calcQMatrices(std::vector<Vertex> &vs, std::vector
         P.push_back(glm::vec4(normal, d));
 
     }
+
+    // Find all planes that the vertex belongs to and calculate Q for each
     for(unsigned int k = 0; k<vs.size(); k++){
         // Find all planes for Vertex k
         unsigned int i = 0;
@@ -255,7 +318,10 @@ std::vector<glm::mat4> Model::calcQMatrices(std::vector<Vertex> &vs, std::vector
         while (i < ind.size())
         {
             if(k == ind[i]){
-                unsigned w = i%3;
+                // Ever 3 points define a face, so if we devide by 3
+                // The face number will be the integer part
+                // ex if i = 16, i/3 = 5.33333, so it is the face number 5;
+                unsigned int w = floor(i/3);
                 Planes.push_back(P[w]);
             }
             i++;

@@ -1,6 +1,6 @@
-#version 310 es
+#version 410
 
-precision mediump float;
+//precision mediump float;
 out vec4 FragColor;
 in vec2 atexCoord;
 in vec3 Normal;
@@ -33,4 +33,6 @@ void main()
     } else {
         FragColor = vec4(result, 1);
     }
+
+    FragColor = vec4(0.7f, 0.7f, 0.7f, 1.0f);
 }
