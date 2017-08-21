@@ -55,6 +55,7 @@ public:
      void Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
      std::vector<Pair> formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q);
      void changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ);
+     void changeVert2(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ);
 };
 
 #endif // MODEL_H

@@ -91,8 +91,8 @@ void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind
         // Where faces = ind.size()/3 and vertices is just vs.size()
         std::cout << "success" << std::endl;
 
-        while(vs.size()>2200){
-            changeVert(Pairs, vs, ind, ListQ);
+        while((ind.size()/3)>1000){
+            changeVert2(Pairs, vs, ind, ListQ);
             //Notice that after that, the number of Pairs should go down by at least 3
             //However, I am not taking into account the Pairs that are repeated
             //There are two Pairs that are repeated for every iteration
@@ -100,6 +100,153 @@ void Model::Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind
              std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
         }
         std::cout<< "success" << std::endl;
+}
+
+void Model::changeVert2(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
+        /*
+         * The idea of this function is to update the variables Pairs, vs, ind and ListQs
+         *  1-> Assign the vertex with the lowest index as v_dash
+         *  2-> Assign the vertex with the highest index as v_remove
+         *  3-> Update vs to make vs[v_dash] = contVert
+         *  4-> Update Qs to make Q[v_dash] = v_dashQ
+         *  5-> Remove the first Pair from the Pairs list
+         *  6-> Change all of the Pairs from v_remove/v_dash to v_dash, which involves
+         *      6.1 Changing its vecPair value from <v1,v2> to <v1,v_dash>
+         *      6.2 Changing its Q value to Q of v_dash + Q of its pair
+         *      6.3 Changing its contVert.Pos value to (v_dash.Pos+itsPair.Pos)/2
+         *      6.4 Changing its contVert.Normal value to normalize(v_dash.Normal+itsPair.Normal)
+         *      6.5 Changing its cost value to contVert*Q*contVert
+         *  7-> For all values of Ind
+         *        7.1 Change from v_remove to v_dash
+         *        7.2 Find if this face has two v_dash and add the different one to a variable "repeated"
+         *        7.3 Remove face that has two v_dash
+         *        This repeated values are the vertex numbers that has duplicated edge with v_dash in the Pairs variable
+         *  8-> Remove Pairs that are duplicated according to the variable "repeated"
+         *  9-> Erase vs[v_remove]
+         *  10-> Erase listQ[v_remove]
+         *  11-> Iterate through Pairs and ind subtracting one from all values that are bigger than v_remove
+         *       Remember that there are no vertices with index == v_remove since we changed them to v_dash
+         * */
+
+        // 1 and 2
+        unsigned int v_dash;
+        unsigned int v_remove;
+        std::vector<unsigned int> repeated;
+        if(Pairs[0].vecPair.first > Pairs[0].vecPair.second){
+            v_remove = Pairs[0].vecPair.first;
+            v_dash = Pairs[0].vecPair.second;
+        } else {
+            v_remove = Pairs[0].vecPair.second;
+            v_dash = Pairs[0].vecPair.first;
+        }
+
+        // 3
+        vs[v_dash] = Pairs[0].contVert;
+        // 4
+        listQ[v_dash] = Pairs[0].Q;
+        // 5
+        Pairs.erase(Pairs.begin());
+        // 6
+        for(unsigned int w=0; w<Pairs.size(); w++){
+            unsigned int theOther;
+            if(!(Pairs[w].vecPair.first==v_remove||Pairs[w].vecPair.first==v_dash||Pairs[w].vecPair.second==v_remove||Pairs[w].vecPair.second==v_dash))
+                continue;
+
+            // 6.1
+            if(Pairs[w].vecPair.first == v_remove||Pairs[w].vecPair.first == v_dash){
+                Pairs[w].vecPair.first = v_dash;
+                theOther = Pairs[w].vecPair.second;
+            }
+            if(Pairs[w].vecPair.second==v_remove||Pairs[w].vecPair.second==v_dash){
+                Pairs[w].vecPair.second = v_dash;
+                theOther = Pairs[w].vecPair.first;
+            }
+
+            //6.2
+            Pairs[w].Q = listQ[theOther] + listQ[v_dash];
+
+            //6.3
+            Pairs[w].contVert.Pos = vs[v_dash].Pos+vs[theOther].Pos;
+            Pairs[w].contVert.Pos = glm::vec3(Pairs[w].contVert.Pos.x/2.0f, Pairs[w].contVert.Pos.y/2.0f, Pairs[w].contVert.Pos.z/2.0f);
+
+            //6.4
+            Pairs[w].contVert.Normal = glm::normalize(vs[v_dash].Normal+vs[theOther].Normal);
+
+            //6.5
+            glm::vec4 c = Pairs[w].Q*glm::vec4(Pairs[w].contVert.Pos,1.0f);
+            Pairs[w].cost = glm::dot(c, glm::vec4(Pairs[w].contVert.Pos,1.0f));
+
+        }
+
+        //7
+        int nFacesRemoved=0;
+        for(unsigned int w=0; w<ind.size(); w++){
+            unsigned int v1 = ind[w++];
+            unsigned int v2 = ind[w++];
+            unsigned int v3 = ind[w];
+
+            //7.1
+            if(v1==v_remove)
+                v1=v_dash;
+            if(v2==v_remove)
+                v2=v_dash;
+            if(v3==v_remove)
+                v3=v_dash;
+
+            //7.2
+            if(v1==v2)
+                repeated.push_back(v3);
+            if(v1==v3)
+                repeated.push_back(v2);
+            if(v2==v3)
+                repeated.push_back(v1);
+
+            //7.3
+            if(v1==v2||v1==v3||v2==v3){
+                ind.erase(ind.begin() + w-2, ind.begin() + w+1);
+                nFacesRemoved++;
+                if(nFacesRemoved==3){
+                    std::cout<<"Something is wrong: 3 faces removed" <<std::endl;
+                }
+                w-=3;
+            }
+
+        }
+
+        //8
+        for(unsigned int w=0; w<Pairs.size();w++){
+            if(repeated.size()==0)
+                break;
+            for(unsigned int i=0; i<repeated.size(); i++){
+                if((Pairs[w].vecPair.first == repeated[i] && Pairs[w].vecPair.second==v_dash) ||
+                    (Pairs[w].vecPair.first == v_dash && Pairs[w].vecPair.second==repeated[i])){
+                    Pairs.erase(Pairs.begin()+w);
+                    repeated.erase(repeated.begin()+i);
+                    --w;
+                    continue;
+                }
+
+            }
+        }
+
+        //9
+        vs.erase(vs.begin()+v_remove);
+
+        //10
+        listQ.erase((listQ.begin() +v_remove));
+
+        //11
+        for(unsigned int w = 0; w<Pairs.size(); w++){
+            if(Pairs[w].vecPair.first>v_remove)
+                Pairs[w].vecPair.first--;
+            if(Pairs[w].vecPair.second>v_remove)
+                Pairs[w].vecPair.second--;
+        }
+        for(unsigned int w=0; w<ind.size(); w++){
+            if(ind[w]>v_remove)
+                ind[w]--;
+        }
+
 }
 
 void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
@@ -174,86 +321,92 @@ void Model::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::v
         }
 
         // Update Pairs Vector
-        Pairs.erase(Pairs.begin());
-        for(unsigned int w=0; w<Pairs.size(); w++){
-            // From now on, the Pairs can have 4 cases:
-            // 1. It has the vertex that was erased as first element
-            // 2. It has the vertex that was erased as second element
-            // 3. It has the vertex that was substituted as first element
-            // 4. It has the vertex that was substituted as second element
-            // The update for the first and third case is the same
-            // The update for the second and fourth case is the same
-            unsigned int fv = Pairs[w].vecPair.first;
-            unsigned int sv = Pairs[w].vecPair.second;
-            // Case 1:
-            if(fv == v_remove||fv== v_dashInd){
-                Pair p;
-                std::pair<unsigned int, unsigned int> k(v_dashInd, sv);
-                if(sv>v_remove) // If the second vertex is bigger than v_remove, update it
-                    --sv;
-                p.vecPair = k;
-                p.contVert.Pos = vs[v_dashInd].Pos + vs[sv].Pos;
-                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
-                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
-                p.contVert.Normal = glm::normalize(p.contVert.Normal);
-                p.Q = listQ[sv] + v_dashQ;
-                //This is a v^t*Q*v Operation
-                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
-                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
-                p.cost = cost;
-                Pairs[w] = p;
-                continue;
-            }
-            // Case 2:
-            if(sv == v_remove || sv == v_dashInd){
-                Pair p;
-                std::pair<unsigned int, unsigned int> k(v_dashInd, fv);
-                if(fv>v_remove) // If the second vertex is bigger than v_remove, update it
-                    --fv;
-                p.vecPair = k;
-                p.contVert.Pos = vs[v_dashInd].Pos + vs[fv].Pos;
-                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
-                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
-                p.contVert.Normal = glm::normalize(p.contVert.Normal);
-                p.Q = listQ[fv] + v_dashQ;
+//        Pairs.erase(Pairs.begin());
+//        for(unsigned int w=0; w<Pairs.size(); w++){
+//            // From now on, the Pairs can have 4 cases:
+//            // 1. It has the vertex that was erased as first element
+//            // 2. It has the vertex that was erased as second element
+//            // 3. It has the vertex that was substituted as first element
+//            // 4. It has the vertex that was substituted as second element
+//            // The update for the first and third case is the same
+//            // The update for the second and fourth case is the same
+//            unsigned int fv = Pairs[w].vecPair.first;
+//            unsigned int sv = Pairs[w].vecPair.second;
+//            // Case 1:
+//            if(fv == v_remove||fv== v_dashInd){
+//                Pair p;
+//                std::pair<unsigned int, unsigned int> k(v_dashInd, sv);
+//                if(sv>v_remove) // If the second vertex is bigger than v_remove, update it
+//                    --sv;
+//                p.vecPair = k;
+//                p.contVert.Pos = vs[v_dashInd].Pos + vs[sv].Pos;
+//                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+//                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
+//                p.contVert.Normal = glm::normalize(p.contVert.Normal);
+//                p.Q = listQ[sv] + v_dashQ;
+//                //This is a v^t*Q*v Operation
+//                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
+//                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
+//                p.cost = cost;
+//                Pairs[w] = p;
+//                continue;
+//            }
+//            // Case 2:
+//            if(sv == v_remove || sv == v_dashInd){
+//                Pair p;
+//                std::pair<unsigned int, unsigned int> k(v_dashInd, fv);
+//                if(fv>v_remove) // If the second vertex is bigger than v_remove, update it
+//                    --fv;
+//                p.vecPair = k;
+//                p.contVert.Pos = vs[v_dashInd].Pos + vs[fv].Pos;
+//                p.contVert.Pos = glm::vec3(p.contVert.Pos.x/2 , p.contVert.Pos.y/2, p.contVert.Pos.z/2);
+//                p.contVert.Normal = vs[v_dashInd].Normal + vs[sv].Normal;
+//                p.contVert.Normal = glm::normalize(p.contVert.Normal);
+//                p.Q = listQ[fv] + v_dashQ;
 
-                //This is a v^t*Q*v Operation
-                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
-                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
-                p.cost = cost;
-                Pairs[w] = p;
-                continue;
-            }
-            if(sv>v_remove){
-                Pairs[w].vecPair.second--;
-            }
-            if(fv>v_remove){
-                Pairs[w].vecPair.first--;
-            }
-        }
+//                //This is a v^t*Q*v Operation
+//                glm::vec4 Cv = p.Q*glm::vec4(p.contVert.Pos,1.0f);
+//                long double cost = glm::dot(glm::vec4(p.contVert.Pos,1.0f),Cv);
+//                p.cost = cost;
+//                Pairs[w] = p;
+//                continue;
+//            }
+//            if(sv>v_remove){
+//                Pairs[w].vecPair.second--;
+//            }
+//            if(fv>v_remove){
+//                Pairs[w].vecPair.first--;
+//            }
+//        }
 
-        for(unsigned int w=0; w<Pairs.size(); w++){
-            unsigned int first = Pairs[w].vecPair.first;
-            unsigned int second = Pairs[w].vecPair.second;
-            for(unsigned int k = 0; k<commonVs.size(); k++){
-                if(first == commonVs[k]){
-                    commonVs.erase(commonVs.begin()+k);
-                    Pairs.erase(Pairs.begin() + w);
-                }
-                if(second == commonVs[k]){
-                    commonVs.erase(commonVs.begin()+k);
-                    Pairs.erase(Pairs.begin() + w);
-                }
-            }
-            if(commonVs.size() ==0){
-                break;
-            }
-        }
+//        for(unsigned int w=0; w<Pairs.size(); w++){
+//            unsigned int first = Pairs[w].vecPair.first;
+//            unsigned int second = Pairs[w].vecPair.second;
+//            for(unsigned int k = 0; k<commonVs.size(); k++){
+//                if((first==v_dashInd||second==v_dashInd)&&(first==commonVs[k]||second==commonVs[k])){
+//                    commonVs.erase(commonVs.begin()+k);
+//                    Pairs.erase(Pairs.begin() + w);
+//                    --w;
+//                    continue;
+//                }
+//            }
+//            if(commonVs.size() ==0){
+//                break;
+//            }
+//        }
+//        for(unsigned int w=0; w<Pairs.size(); w++){
+//            for(unsigned int k = w+1; k<Pairs.size(); k++){
+//                if(Pairs[w].vecPair == Pairs[k].vecPair){
+//                    Pairs.erase(Pairs.begin()+k);
+//                    --k;
+//                }
+//            }
+//        }
         // Check when pairs have the same "face"
 
-
-//        std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
-//        Pairs = formPairList(vs,pairs, listQ);
+        // Worst way of doing it, but at least it works
+        std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
+        Pairs = formPairList(vs,pairs, listQ);
 
 }
 
