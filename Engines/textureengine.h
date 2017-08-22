@@ -15,6 +15,7 @@ namespace TextureEngine{
         std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
         std::vector<Pair> formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q);
         std::vector<glm::mat4> calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
+        std::vector<glm::mat4> calcQMatrices2(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
     }
 
     namespace SaptiotemporalEngine{

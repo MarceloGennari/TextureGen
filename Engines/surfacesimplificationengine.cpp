@@ -2,7 +2,7 @@
 
 void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     unRepVert(vs, ind);
-    std::vector<glm::mat4> ListQ = calcQMatrices(vs, ind);
+    std::vector<glm::mat4> ListQ = calcQMatrices2(vs, ind);
     std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
     std::vector<Pair> Pairs = formPairList(vs,pairs, ListQ);
     // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
@@ -15,6 +15,7 @@ void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &v
 }
 
 void TextureEngine::SurfaceSimplificationEngine::unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+
     /*
      * The idea of this algorithm is to implement this: https://stackoverflow.com/questions/2407451/find-unique-vertices-from-a-triangle-soup
      * The other two unRepVert are approximately O(n^2) (since there is a for loop inside a for loop)
@@ -57,6 +58,104 @@ void TextureEngine::SurfaceSimplificationEngine::unRepVert(std::vector<Vertex> &
      }
 
 }
+
+std::vector<glm::mat4> TextureEngine::SurfaceSimplificationEngine::calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+
+    std::vector<glm::vec4> P;
+    std::vector<glm::mat4> ListKp;
+
+    // Calculate the planes that define each face in the form vec4 (a,b,c,d) so that
+    // ax + by + cz + d = 0, which defines a plane in (x,y,z)
+    for(unsigned int k = 0; k<ind.size(); k++){
+        // Calculate P for each plane (set of three vertices)
+        glm::vec3 v1 = vs[ind[k++]].Pos;
+        glm::vec3 v2 = vs[ind[k++]].Pos;
+        glm::vec3 v3 = vs[ind[k]].Pos;
+        // Notice that ax + by + cz + d = 0 for p = <a,b,c> is such that <a,b,c> is the vector normal to the plane
+        glm::vec3 normal = glm::normalize(glm::cross(v1-v3,v2-v3)); // this is <a,b,c>
+        float d = -glm::dot(v3, normal);
+        P.push_back(glm::vec4(normal, d));
+
+    }
+
+    // Find all planes that the vertex belongs to and calculate Q for each
+    for(unsigned int k = 0; k<vs.size(); k++){
+        // Find all planes for Vertex k
+        unsigned int i = 0;
+        std::vector<glm::vec4> Planes;
+        while (i < ind.size())
+        {
+            if(k == ind[i]){
+                // Ever 3 points define a face, so if we devide by 3
+                // The face number will be the integer part
+                // ex if i = 16, i/3 = 5.33333, so it is the face number 5;
+                unsigned int w = floor(i/3);
+                Planes.push_back(P[w]);
+            }
+            i++;
+        }
+        // Sum all Kp for that Vertex to get Q
+        glm::mat4 Kp;
+        bool first = true;
+        for(unsigned t =0; t<Planes.size(); t++){
+            if(first){
+                Kp = glm::outerProduct(Planes[t], Planes[t]);
+            }else{
+                Kp = Kp + glm::outerProduct(Planes[t], Planes[t]);
+            }
+            first = false;
+        }
+        ListKp.push_back(Kp);
+    }
+    return ListKp;
+}
+
+std::vector<glm::mat4> TextureEngine::SurfaceSimplificationEngine::calcQMatrices2(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+
+    std::vector<std::vector<glm::mat4> > ListKp(vs.size());
+    std::vector<glm::mat4> ListQ(vs.size());
+
+    // Calculate the planes that define each face in the form vec4 (a,b,c,d) so that
+    // ax + by + cz + d = 0, which defines a plane in (x,y,z)
+    for(unsigned int k = 0; k<ind.size(); k++){
+        unsigned int v1Ind = ind[k++];
+        unsigned int v2Ind = ind[k++];
+        unsigned int v3Ind = ind[k];
+        // Calculate P for each plane (set of three vertices)
+        glm::vec3 v1 = vs[v1Ind].Pos;
+        glm::vec3 v2 = vs[v2Ind].Pos;
+        glm::vec3 v3 = vs[v3Ind].Pos;
+        // Notice that ax + by + cz + d = 0 for p = <a,b,c> is such that <a,b,c> is the vector normal to the plane
+        glm::vec3 normal = glm::normalize(glm::cross(v1-v3,v2-v3)); // this is <a,b,c>
+        float d = -glm::dot(v3, normal);
+        glm::vec4 p = glm::vec4(normal,d);
+
+        // Adding Kp to the three vertices
+        ListKp[v1Ind].push_back(glm::outerProduct(p,p));
+        ListKp[v2Ind].push_back(glm::outerProduct(p,p));
+        ListKp[v3Ind].push_back(glm::outerProduct(p,p));
+    }
+
+    // Sum Kp of all vertices to find Q
+    for(unsigned int k = 0; k<vs.size(); k++){
+        bool first = true;
+        for(unsigned i = 0; i<ListKp[k].size(); i++){
+            if(first){
+                glm::mat4 Q = ListKp[k][i];
+                ListQ[k] = Q;
+            }
+            else{
+                glm::mat4 Q = ListKp[k][i];
+                ListQ[k] = ListQ[k]+Q;
+            }
+
+        }
+        first = false;
+
+    }
+    return ListQ;
+}
+
 void TextureEngine::SurfaceSimplificationEngine::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
     /*
          * The idea of this function is to update the variables Pairs, vs, ind and ListQs
@@ -260,54 +359,4 @@ std::vector<Pair> TextureEngine::SurfaceSimplificationEngine::formPairList(std::
     std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
 
     return Pairs;
-}
-std::vector<glm::mat4> TextureEngine::SurfaceSimplificationEngine::calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
-
-    std::vector<glm::vec4> P;
-    std::vector<glm::mat4> ListKp;
-
-    // Calculate the planes that define each face in the form vec4 (a,b,c,d) so that
-    // ax + by + cz + d = 0, which defines a plane in (x,y,z)
-    for(unsigned int k = 0; k<ind.size(); k++){
-        // Calculate P for each plane (set of three vertices)
-        glm::vec3 v1 = vs[ind[k++]].Pos;
-        glm::vec3 v2 = vs[ind[k++]].Pos;
-        glm::vec3 v3 = vs[ind[k]].Pos;
-        // Notice that ax + by + cz + d = 0 for p = <a,b,c> is such that <a,b,c> is the vector normal to the plane
-        glm::vec3 normal = glm::normalize(glm::cross(v1-v3,v2-v3)); // this is <a,b,c>
-        float d = -glm::dot(v3, normal);
-        P.push_back(glm::vec4(normal, d));
-
-    }
-
-    // Find all planes that the vertex belongs to and calculate Q for each
-    for(unsigned int k = 0; k<vs.size(); k++){
-        // Find all planes for Vertex k
-        unsigned int i = 0;
-        std::vector<glm::vec4> Planes;
-        while (i < ind.size())
-        {
-            if(k == ind[i]){
-                // Ever 3 points define a face, so if we devide by 3
-                // The face number will be the integer part
-                // ex if i = 16, i/3 = 5.33333, so it is the face number 5;
-                unsigned int w = floor(i/3);
-                Planes.push_back(P[w]);
-            }
-            i++;
-        }
-        // Sum all Kp for that Vertex to get Q
-        glm::mat4 Kp;
-        bool first = true;
-        for(unsigned t =0; t<Planes.size(); t++){
-            if(first){
-                Kp = glm::outerProduct(Planes[t], Planes[t]);
-            }else{
-                Kp = Kp + glm::outerProduct(Planes[t], Planes[t]);
-            }
-            first = false;
-        }
-        ListKp.push_back(Kp);
-    }
-    return ListKp;
 }
