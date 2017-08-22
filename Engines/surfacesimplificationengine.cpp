@@ -8,8 +8,8 @@ void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &v
     // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
     // Where faces = ind.size()/3 and vertices is just vs.size()
 
-    int perc = (ind.size()/3)*1.0;
-    while((ind.size()/3)>perc){
+    int perc = vs.size()*.9;
+    while(vs.size()>perc){
         changeVert(Pairs, vs, ind, ListQ);
         //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
     }
@@ -300,6 +300,28 @@ void TextureEngine::SurfaceSimplificationEngine::changeVert(std::vector<Pair> &P
 
         //12
         std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
+}
+
+void TextureEngine::SurfaceSimplificationEngine::changeVert2(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
+    /*
+     * The other solution works but it takes too long (8 seconds for a model with 1.4m faces)
+     *
+     * */
+
+    // 1 and 2
+    unsigned int v_dash = Pairs[0].vecPair.second;
+    unsigned int v_remove = Pairs[0].vecPair.first;
+
+    // 3
+    vs[v_dash] = Pairs[0].contVert;
+    vs[v_remove] = vs[v_dash];
+    // 4
+    listQ[v_dash] = Pairs[0].Q;
+    listQ[v_remove] = listQ[v_dash];
+    // 5
+    Pairs.erase(Pairs.begin());
+
+
 }
 
 std::vector<std::pair<unsigned int, unsigned int> > TextureEngine::SurfaceSimplificationEngine::PairSelection(std::vector<unsigned int> &ind){
