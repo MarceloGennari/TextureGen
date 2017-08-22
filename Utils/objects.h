@@ -1,6 +1,7 @@
 #ifndef OBJECTS_H
 #define OBJECTS_H
 
+#include <vector>
 struct Vertex{
     glm::vec3 Pos;
     glm::vec3 Normal;
@@ -46,6 +47,24 @@ struct Pair{
     long double cost;
 };
 
+struct pairSort
+{
+    inline bool operator() (const std::pair<unsigned int, unsigned int>& struct1, const std::pair<unsigned int, unsigned int>& struct2)
+    {
+        if(struct1.first!=struct2.first)
+            return (struct1.first < struct2.first);
+        else
+            return(struct1.second<struct2.second);
+    }
+};
+
+
+struct pairComp{
+    inline bool operator() (const std::pair<unsigned int, unsigned int>& struct1, const std::pair<unsigned int, unsigned int>& struct2)
+    {
+        return(struct1.first==struct2.first && struct1.second==struct2.second);
+    }
+};
 
 struct less_than_cost
 {

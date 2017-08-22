@@ -3,12 +3,13 @@
 void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     unRepVert(vs, ind);
     std::vector<glm::mat4> ListQ = calcQMatrices2(vs, ind);
-    std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection(ind);
+    std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection2(ind);
     std::vector<Pair> Pairs = formPairList(vs,pairs, ListQ);
     // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
     // Where faces = ind.size()/3 and vertices is just vs.size()
 
-    while((ind.size())/3>100){
+    int perc = (ind.size()/3)*1.0;
+    while((ind.size()/3)>perc){
         changeVert(Pairs, vs, ind, ListQ);
         //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
     }
@@ -300,8 +301,13 @@ void TextureEngine::SurfaceSimplificationEngine::changeVert(std::vector<Pair> &P
         //12
         std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
 }
+
 std::vector<std::pair<unsigned int, unsigned int> > TextureEngine::SurfaceSimplificationEngine::PairSelection(std::vector<unsigned int> &ind){
     std::vector<std::pair<unsigned int, unsigned int> > pairs;
+    /*
+     * The idea of this algorithm is to find all of the pairs of a mesh by comoparing all of them
+     * This is is taking O(n^2), which is not good for a mesh with a lot of vertices
+     * */
     unsigned int v1;
     unsigned int v2;
     unsigned int v3;
@@ -327,6 +333,57 @@ std::vector<std::pair<unsigned int, unsigned int> > TextureEngine::SurfaceSimpli
     }
     return pairs;
 }
+
+std::vector<std::pair<unsigned int, unsigned int> > TextureEngine::SurfaceSimplificationEngine::PairSelection2(std::vector<unsigned int> &ind){
+    std::vector<std::pair<unsigned int, unsigned int> > pairs;
+    /*
+     * The idea of this algorithm is to find all of the pairs of a mesh
+     * We first add all of the possible combinations
+     * The result will be 2*n, where n is the number of edges (for a polyhedra)
+     * Then we sort it in a way that duplicate edges will be in sequence
+     * Then we use the same aporoach for unRepVert of unique(sort(array))
+     * */
+    unsigned int v1;
+    unsigned int v2;
+    unsigned int v3;
+    unsigned k;
+    for(k = 0; k<ind.size(); k++){
+        v1 = ind[k++]; v2 = ind[k++]; v3=ind[k];
+
+
+
+        // Makes sure that v1>v2>v3
+        if(v3>v1){
+            unsigned int temp = v1;
+            v1 = v3;
+            v3 = temp;
+        }
+        if(v3>v2){
+            unsigned int temp = v2;
+            v2 = v3;
+            v3 = temp;
+        }
+        if(v2>v1){
+            unsigned int temp = v1;
+            v1 = v2;
+            v2 = temp;
+        }
+
+        pairs.push_back(std::pair<unsigned int, unsigned int>(v1,v2));
+        pairs.push_back(std::pair<unsigned int, unsigned int>(v1,v3));
+        pairs.push_back(std::pair<unsigned int, unsigned int>(v2,v3));
+    }
+
+    // Now we sort Pairs according to their vlue
+    // Keep in mind that pairs.first > pairs.second
+    std::sort(pairs.begin(), pairs.end(), pairSort());
+    pairs.erase(std::unique(pairs.begin(), pairs.end(), pairComp()), pairs.end());
+
+
+
+    return pairs;
+}
+
 std::vector<Pair> TextureEngine::SurfaceSimplificationEngine::formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q){
 
     std::vector<Pair> Pairs;
