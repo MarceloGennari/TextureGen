@@ -610,7 +610,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
      * This is because stl doesn't use EBOs
      * So the next function tries to rectify this by assigning the right indices to the right vertices.
      * **/
-    Optimization(vertices, indices);
+    TextureEngine::SurfaceSimplificationEngine::Optimize(vertices, indices);
 
     return Mesh(vertices, indices, textures);
 }

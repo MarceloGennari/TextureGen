@@ -1,4 +1,4 @@
-#version 4.1
+#version 3.10 es
 
 //layout(triangles) in;
 //layout(triangle_strip, max_vertices =3) out;

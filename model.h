@@ -7,20 +7,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "stb_image.h"
-
-struct Pair{
-    std::pair<unsigned int, unsigned int> vecPair;
-    Vertex contVert;
-    glm::mat4 Q;
-    long double cost;
-};
-struct less_than_cost
-{
-    inline bool operator() (const Pair& struct1, const Pair& struct2)
-    {
-        return (struct1.cost < struct2.cost);
-    }
-};
+#include "textureengine.h"
+#include "objects.h"
 
 class Model
 {
@@ -49,6 +37,7 @@ public:
      std::vector<TextureS> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
                                           std::string typeName);
      unsigned int TextureFromFile(const char *path, const std::string &directory);
+
      std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
      void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
      std::vector<glm::mat4> calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
