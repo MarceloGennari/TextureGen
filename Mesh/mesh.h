@@ -10,20 +10,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "objects.h"
 
-struct Vertex{
-    glm::vec3 Pos;
-    glm::vec3 Normal;
-    glm::vec2 TexCoords;
-    glm::vec3 Tangent;
-    glm::vec3 Bitangent;
-};
-
-struct TextureS{
-    unsigned int id;
-    std::string type;
-    aiString path;
-};
 
 class Mesh
 {
