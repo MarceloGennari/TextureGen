@@ -111,9 +111,9 @@ void render(){
     Mesh m(Vertices, Indices, Textured);
 
 
-    std::string fragm = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
-    std::string geom = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/geometryshader.vert";
-    std::string vec = "/home/marcelo/Desktop/TextureGen/Shader/GLSLSources/vertexshader.fsh";
+    std::string fragm = "/home/marcelo/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
+    std::string geom = "/home/marcelo/TextureGen/Shader/GLSLSources/geometryshader.vert";
+    std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), geom.c_str(), fragm.c_str());
 
     /**********
@@ -198,8 +198,8 @@ int main(int argc, char *argv[])
     Camera::getCam()->pitch = 0;
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
-    Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
-    //Model::getModel()->loadModel("/home/marcelo/Downloads/darksouls/EliteKnight.stl");
+    //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
+    Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
     glutMainLoop();
     return 0;
 }

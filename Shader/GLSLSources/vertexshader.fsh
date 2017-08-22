@@ -1,6 +1,6 @@
-#version 310 es
+#version 410
 
-precision mediump float;
+//precision mediump float;
 
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 normal;

@@ -1,6 +1,6 @@
-#version 310 es
+#version 410
 
-precision mediump float;
+//precision mediump float;
 out vec4 FragColor;
 in vec2 atexCoord;
 in vec3 Normal;
