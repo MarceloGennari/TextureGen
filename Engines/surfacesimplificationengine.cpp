@@ -8,46 +8,53 @@ void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &v
     // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
     // Where faces = ind.size()/3 and vertices is just vs.size()
 
-    while(vs.size()>30){
+    while((ind.size())/3>100){
         changeVert(Pairs, vs, ind, ListQ);
         //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
     }
-
 }
 
 void TextureEngine::SurfaceSimplificationEngine::unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     /*
-     * The idea of this algorithm is:
-     * we iterate from 0 to the size of the vector and compare each other
-     * if we find two that are equal, we substitute that one in the EBO
-     * the "continue" part is in case we try to check the same vertex again.
-     * the i-count is because the vertex 300 in the old scheme is going to become 300-count where count is the number of vertices that were taken out
-   */
-    std::vector <unsigned int> newInd;
-    std::vector <Vertex> newVs;
-    std::vector <unsigned int> repeatedVs;
+     * The idea of this algorithm is to implement this: https://stackoverflow.com/questions/2407451/find-unique-vertices-from-a-triangle-soup
+     * The other two unRepVert are approximately O(n^2) (since there is a for loop inside a for loop)
+     * This implementation however should accelerate things a bit and make it O(nlogn)
+     * If we do std::unique(std::sort()) for the position of the vertices,
+     * we will get a list of unique vertices
+     * The next step then is to update the list of indeces
+     *
+     * This works way faster than the previous attempts and allegedely works on O(nlog(n))
+     * */
 
-    newInd = ind;
-    for(unsigned int i = 0; i<vs.size(); i++){
-        if(std::find(repeatedVs.begin(), repeatedVs.end(), i) != repeatedVs.end() ){
-            continue;
-        }
-        newVs.push_back(vs[i]);
-        newInd[i] = newVs.size()-1;
-
-        for(unsigned int j=i+1; j<vs.size(); j++){
-            // Apparently there are vertices with the same position but different normal values
-            // Since the code wants vertex at same position (and since we can calculate normals afterwards)
-            // I am going to stick with the "same vertex position" approach
-                if(vs[i].Pos == vs[j].Pos /*&& vs[i].Normal == vs[j].Normal*/){
-                    repeatedVs.push_back(j);
-                    newInd[j] = newVs.size()-1;
-                }
-        }
+    // Creates a vector of structs that join the vertex with their respective indeces
+    std::vector<VertInd> vSort;
+    for(unsigned int w = 0; w<ind.size(); w++){
+        VertInd v;
+        v.v = vs[w];
+        v.ind = ind[w];
+        vSort.push_back(v);
     }
 
-    vs = newVs;
-    ind = newInd;
+    // This sorts the vertex with the indeces based on whether their position are the same
+    std::sort(vSort.begin(), vSort.end(), VertSort());
+
+    // Retrieve the list of vertex
+    for(unsigned int w=0; w<vSort.size(); w++){
+        vs[w] = vSort[w].v;
+    }
+
+    // Make sure that all of the vertices are unique
+     vs.erase(std::unique(vs.begin(), vs.end(), vsComp()), vs.end());
+
+     // Associates the new index i of each vertex to the right place in the ind array
+     unsigned int count = 0;
+     for(unsigned int w=0; w<vSort.size(); w++){
+        ind[vSort[w].ind] = count;
+        if(vSort[w].v.Pos == vSort[w+1].v.Pos){
+            continue;
+        }
+        count++;
+     }
 
 }
 void TextureEngine::SurfaceSimplificationEngine::changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ){
