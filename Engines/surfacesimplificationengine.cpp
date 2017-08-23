@@ -1,5 +1,168 @@
 #include "textureengine.h"
 
+
+void TextureEngine::SurfaceSimplificationEngine::Optimize2(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
+    /*
+     * This is an attempt to speed things up by moving pointers instead of values around
+     * */
+
+    std::vector<Vertex*> Vertices(vs.size());
+    std::vector<unsigned int> Indeces(ind.size());
+    unRepVert(vs, ind);
+
+    for(unsigned int k = 0; k<vs.size(); k++){
+        Vertices[k] = &vs[k];
+    }
+
+    std::vector<glm::mat4 *> ListQ = calcQMatrices(Vertices, ind);
+    std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection2(ind);
+    std::vector<Pair *> Pairs = formPairList(Vertices,pairs, ListQ);
+    // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
+    // Where faces = ind.size()/3 and vertices is just vs.size()
+
+    int perc = Pairs.size()*0;
+    while(Pairs.size()>perc){
+        changeVert(Pairs, Vertices, ind, ListQ);
+        //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
+    }
+
+    for(unsigned int k = 0; k<vs.size(); k++){
+        vs[k] = *Vertices[k];
+    }
+}
+
+
+std::vector<glm::mat4 *> TextureEngine::SurfaceSimplificationEngine::calcQMatrices(std::vector<Vertex *> &vs, std::vector<unsigned int> &ind){
+    std::vector<std::vector<glm::mat4> > ListKp(vs.size());
+    std::vector<glm::mat4 *> ListQ;
+
+    // Calculate the planes that define each face in the form vec4 (a,b,c,d) so that
+    // ax + by + cz + d = 0, which defines a plane in (x,y,z)
+    for(unsigned int k = 0; k<ind.size(); k++){
+        unsigned int v1Ind = ind[k++];
+        unsigned int v2Ind = ind[k++];
+        unsigned int v3Ind = ind[k];
+        // Calculate P for each plane (set of three vertices)
+        glm::vec3 v1 = vs[v1Ind]->Pos;
+        glm::vec3 v2 = vs[v2Ind]->Pos;
+        glm::vec3 v3 = vs[v3Ind]->Pos;
+        // Notice that ax + by + cz + d = 0 for p = <a,b,c> is such that <a,b,c> is the vector normal to the plane
+        glm::vec3 normal = glm::normalize(glm::cross(v1-v3,v2-v3)); // this is <a,b,c>
+        float d = -glm::dot(v3, normal);
+        glm::vec4 p = glm::vec4(normal,d);
+
+        // Adding Kp to the three vertices
+        ListKp[v1Ind].push_back(glm::outerProduct(p,p));
+        ListKp[v2Ind].push_back(glm::outerProduct(p,p));
+        ListKp[v3Ind].push_back(glm::outerProduct(p,p));
+    }
+
+    // Sum Kp of all vertices to find Q
+    for(unsigned int k = 0; k<vs.size(); k++){
+        bool first = true;
+        for(unsigned i = 0; i<ListKp[k].size(); i++){
+            if(first){
+                ListQ.push_back(new glm::mat4);
+                ListQ[k] = &ListKp[k][i];
+                first = false;
+            }
+            else{
+                glm::mat4* Q = &ListKp[k][i];
+                *(ListQ[k]) = *ListQ[k]+*Q;
+            }
+
+        }
+
+    }
+    return ListQ;
+}
+
+std::vector<Pair *> TextureEngine::SurfaceSimplificationEngine::formPairList(std::vector<Vertex *> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4 *> &Q){
+
+    std::vector<Pair *> Pairs;
+    for(unsigned int k= 0; k<pairs.size(); k++){
+        Pair *p = new Pair;
+        p->vecPair = pairs[k];
+        glm::mat4 i = *Q[p->vecPair.first];
+        p->Q = *(Q[p->vecPair.first])+*(Q[p->vecPair.second]);
+        //if invertible
+        /* SOLVE THE MINIMUM SQUARE METHOD
+         * Not working at the moment and I cannot be bothered to figure out why not
+         * Postpone it a bit
+         * */
+//        const float *y = (const float*)glm::value_ptr(p.Q);
+//        float l[16] = {y[0], y[1], y[2],y[3], y[4], y[5], y[6], y[7], y[8],y[9], y[10], y[11],  y[12],y[13], y[14], y[15]};
+//        glm::mat4 Opt = glm::make_mat4(l);
+//        glm::vec4 v_dash = glm::inverse(Opt)*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+//        v_dash = glm::vec4(v_dash.x/v_dash.w, v_dash.y/v_dash.w, v_dash.z/v_dash.w, v_dash.w/v_dash.w);
+        p->contVert.Pos = (vs[p->vecPair.first]->Pos + vs[p->vecPair.second]->Pos);
+        p->contVert.Pos = glm::vec3(p->contVert.Pos.x/2, p->contVert.Pos.y/2, p->contVert.Pos.z/2);
+        p->contVert.Normal = (vs[p->vecPair.first]->Normal + vs[p->vecPair.second]->Normal);
+        p->contVert.Normal = glm::normalize(p->contVert.Normal);
+
+        glm::vec4 m = glm::vec4(p->contVert.Pos, 1.0f);
+        glm::vec4 pl = m*glm::mat4(p->Q);
+        long double cost = glm::dot(pl, glm::vec4(p->contVert.Pos, 1.0f));
+        p->cost = cost;
+
+        Pairs.push_back(p);
+    }
+    //std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
+
+    return Pairs;
+}
+
+void TextureEngine::SurfaceSimplificationEngine::changeVert(std::vector<Pair *> &Pairs, std::vector<Vertex *> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4 *> &listQ){
+    /*
+     * The other solution works but it takes too long (8 seconds for a model with 1.4m faces)
+     *
+     * */
+
+    // 1 and 2
+    unsigned int v_dash = Pairs[0]->vecPair.second;
+    unsigned int v_remove = Pairs[0]->vecPair.first;
+
+    // 3
+    vs[v_dash] = &Pairs[0]->contVert;
+    vs[v_remove] = vs[v_dash];
+    // 4
+    listQ[v_dash] = &Pairs[0]->Q;
+    listQ[v_remove] = listQ[v_dash];
+    // 5
+    Pairs.erase(Pairs.begin());
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void TextureEngine::SurfaceSimplificationEngine::Optimize(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     unRepVert(vs, ind);
     std::vector<glm::mat4> ListQ = calcQMatrices2(vs, ind);
@@ -142,8 +305,8 @@ std::vector<glm::mat4> TextureEngine::SurfaceSimplificationEngine::calcQMatrices
         bool first = true;
         for(unsigned i = 0; i<ListKp[k].size(); i++){
             if(first){
-                glm::mat4 Q = ListKp[k][i];
-                ListQ[k] = Q;
+                ListQ[k] = ListKp[k][i];
+                first = false;
             }
             else{
                 glm::mat4 Q = ListKp[k][i];
@@ -151,7 +314,6 @@ std::vector<glm::mat4> TextureEngine::SurfaceSimplificationEngine::calcQMatrices
             }
 
         }
-        first = false;
 
     }
     return ListQ;
@@ -320,8 +482,6 @@ void TextureEngine::SurfaceSimplificationEngine::changeVert2(std::vector<Pair> &
     listQ[v_remove] = listQ[v_dash];
     // 5
     Pairs.erase(Pairs.begin());
-
-
 }
 
 std::vector<std::pair<unsigned int, unsigned int> > TextureEngine::SurfaceSimplificationEngine::PairSelection(std::vector<unsigned int> &ind){
@@ -435,7 +595,7 @@ std::vector<Pair> TextureEngine::SurfaceSimplificationEngine::formPairList(std::
 
         Pairs.push_back(p);
     }
-    std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
+    //std::sort(Pairs.begin(), Pairs.end(), less_than_cost());
 
     return Pairs;
 }
