@@ -5,30 +5,31 @@ void TextureEngine::SurfaceSimplificationEngine::Optimize2(std::vector<Vertex> &
     /*
      * This is an attempt to speed things up by moving pointers instead of values around
      * */
+    bool simplify = false;
 
-    std::vector<Vertex*> Vertices(vs.size());
-    std::vector<unsigned int> Indeces(ind.size());
-    unRepVert(vs, ind);
+        std::vector<Vertex*> Vertices(vs.size());
+        std::vector<unsigned int> Indeces(ind.size());
+        unRepVert(vs, ind);
 
-    for(unsigned int k = 0; k<vs.size(); k++){
-        Vertices[k] = &vs[k];
-    }
+        for(unsigned int k = 0; k<vs.size(); k++){
+            Vertices[k] = &vs[k];
+        }
 
-    std::vector<glm::mat4 *> ListQ = calcQMatrices(Vertices, ind);
-    std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection2(ind);
-    std::vector<Pair *> Pairs = formPairList(Vertices,pairs, ListQ);
-    // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
-    // Where faces = ind.size()/3 and vertices is just vs.size()
+        std::vector<glm::mat4 *> ListQ = calcQMatrices(Vertices, ind);
+        std::vector<std::pair<unsigned int, unsigned int> > pairs = PairSelection2(ind);
+        std::vector<Pair *> Pairs = formPairList(Vertices,pairs, ListQ);
+        // Note that number of pairs has to satisfy Faces + Vertices - Edges = 2 (if it is a Polyhedra)
+        // Where faces = ind.size()/3 and vertices is just vs.size()
 
-    int perc = Pairs.size()*0;
-    while(Pairs.size()>perc){
-        changeVert(Pairs, Vertices, ind, ListQ);
-        //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
-    }
+//        int perc = Pairs.size()*0;
+//        while(Pairs.size()>perc){
+//            changeVert(Pairs, Vertices, ind, ListQ);
+//            //Notice that after that, the number of Pairs should go down by at least 3 (if Vertex is not an edge)
+//        }
 
-    for(unsigned int k = 0; k<vs.size(); k++){
-        vs[k] = *Vertices[k];
-    }
+//        for(unsigned int k = 0; k<vs.size(); k++){
+//            vs[k] = *Vertices[k];
+//        }
 }
 
 

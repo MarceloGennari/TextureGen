@@ -168,7 +168,6 @@ std::vector<TextureS> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType
        return textures;
    }
 
-
 unsigned int Model::TextureFromFile(const char *path, const std::string &directory)
 {
     glewInit();

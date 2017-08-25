@@ -27,10 +27,15 @@ namespace TextureEngine{
     }
 
     namespace SaptiotemporalEngine{
+        class Image{
+            public:
+                Image();
 
+        };
 
 
     }
+
 
 }
 

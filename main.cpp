@@ -15,16 +15,17 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "CImg.h"
 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-using namespace std;
+using namespace cimg_library;
 
 void render(){
 
-    glClearColor(0.1,0.1, 0.1, 1.0);
+    glClearColor(0.9,0.9, 0.9, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -199,7 +200,103 @@ int main(int argc, char *argv[])
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
-    Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
+    //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
+    Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
+
+    /*
+     *
+     * Apparently, the way that stbi_load works is that it loads rgb of each pixel sequentially
+     * That means that rgb[0] is red, rgb[1] is blue, rgb[2] is greeen, then rgb[3] is red
+     * So we have:
+     *          Red: if(i%3 == 0)
+     *          Green: if(i%3 == 1)
+     *          Blue: if(i%3 == 2);
+     * */
+    int width, height, bpp;
+    unsigned char *rgb = stbi_load("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm", &width, &height, &bpp, 3);
+
+    std::vector<unsigned char> Red;
+    std::vector<unsigned char> Green;
+    std::vector<unsigned char> Blue;
+
+    for(unsigned int k= 0; k<3*width*height; k++){
+        Red.push_back(*(rgb+k));
+        Green.push_back(*(rgb+k+1));
+        Blue.push_back(*(rgb+k+2));
+        k = k+2;
+    }
+
+    unsigned char *rgb2 = (unsigned char*)malloc(width*height*3);
+    for(unsigned int k = 0; k<width*height;k++){
+        *(rgb2+k) = Red[k];
+    }
+    for(unsigned int k = 0; k<width*height;k++){
+        *(rgb2+k+width*height) = Green[k];
+    }
+    for(unsigned int k = 0; k<width*height;k++){
+        *(rgb2+2*width*height) = Blue[k];
+    }
+
+
+    CImg<unsigned char> image(width, height, 1, bpp);
+    image._data = rgb2;
+    CImg<unsigned char> image2("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm");
+
+    unsigned char *rgb3 = image2._data;
+
+    for(unsigned int k = 0; k< width*height; k++){
+        std::cout<< "rgb: "<<(int)rgb[k]<< "   rgb2: "<<(int)rgb2[k]<< "   rgb3: "<<(int)rgb3[k] << std::endl;
+    }
+
+
+    CImgDisplay main_disp(image, "Click a point");
+    CImgDisplay main_disp2(image2, "Check");
+    main_disp.display(image);
+    main_disp2.display(image2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     glutMainLoop();
     return 0;
 }
