@@ -12,6 +12,7 @@
 #include "texture.h"
 #include "model.h"
 #include "light.h"
+#include "image.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -212,89 +213,9 @@ int main(int argc, char *argv[])
      *          Green: if(i%3 == 1)
      *          Blue: if(i%3 == 2);
      * */
-    int width, height, bpp;
-    unsigned char *rgb = stbi_load("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm", &width, &height, &bpp, 3);
-
-    std::vector<unsigned char> Red;
-    std::vector<unsigned char> Green;
-    std::vector<unsigned char> Blue;
-
-    for(unsigned int k= 0; k<3*width*height; k++){
-        Red.push_back(*(rgb+k));
-        Green.push_back(*(rgb+k+1));
-        Blue.push_back(*(rgb+k+2));
-        k = k+2;
-    }
-
-    unsigned char *rgb2 = (unsigned char*)malloc(width*height*3);
-    for(unsigned int k = 0; k<width*height;k++){
-        *(rgb2+k) = Red[k];
-    }
-    for(unsigned int k = 0; k<width*height;k++){
-        *(rgb2+k+width*height) = Green[k];
-    }
-    for(unsigned int k = 0; k<width*height;k++){
-        *(rgb2+2*width*height) = Blue[k];
-    }
-
-
-    CImg<unsigned char> image(width, height, 1, bpp);
-    image._data = rgb2;
-    CImg<unsigned char> image2("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm");
-
-    unsigned char *rgb3 = image2._data;
-
-    for(unsigned int k = 0; k< width*height; k++){
-        std::cout<< "rgb: "<<(int)rgb[k]<< "   rgb2: "<<(int)rgb2[k]<< "   rgb3: "<<(int)rgb3[k] << std::endl;
-    }
-
-
-    CImgDisplay main_disp(image, "Click a point");
-    CImgDisplay main_disp2(image2, "Check");
-    main_disp.display(image);
-    main_disp2.display(image2);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    TextureEngine::SaptiotemporalEngine::testingSTB();
+    Image im;
+    im.loadPGM("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm");
 
 
     glutMainLoop();
