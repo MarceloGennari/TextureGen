@@ -16,13 +16,11 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "CImg.h"
 
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-using namespace cimg_library;
 
 void render(){
 
@@ -200,9 +198,9 @@ int main(int argc, char *argv[])
     Camera::getCam()->pitch = 0;
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
-    //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
+    Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
-    Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
+    //Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
 
     /*
      *
@@ -216,6 +214,7 @@ int main(int argc, char *argv[])
     TextureEngine::SaptiotemporalEngine::testingSTB();
     Image im;
     im.loadPGM("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm");
+    im.Display();
 
 
     glutMainLoop();

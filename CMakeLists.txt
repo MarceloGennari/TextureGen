@@ -55,9 +55,9 @@ include_directories(Utils)
 #########################
 
 
-include_directories(/home/marcelo/Downloads/assimp-4.0.1/include)
-include_directories(/home/marcelo/Downloads/assimp-4.0.1/build/include)
-LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.1/build/code)
+include_directories(/home/marcelo/Downloads/assimp-4.0.0/include)
+include_directories(/home/marcelo/Downloads/assimp-4.0.0/build/include)
+LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.0/build/code)
 
 set(SOURCE ${SOURCE} model.cpp model.h)
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy})
