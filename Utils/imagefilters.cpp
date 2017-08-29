@@ -1,5 +1,7 @@
 #include "objects.h"
 
+using namespace ImageProcessing;
+
 unsigned char * ImageFilters::horLPF(Image &im){
     int width = im.getWidth();
     int height = im.getHeight();

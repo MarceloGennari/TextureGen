@@ -28,8 +28,7 @@ namespace TextureEngine{
     }
 
     namespace SaptiotemporalEngine{
-        void calcBlur(Image &im);
-
+        std::vector<Frame *> temporalSampling(int sigMax, int sigMin, int nrFrames);
     }
 
 

@@ -12,8 +12,8 @@ void Camera::keyBoardInput(unsigned char key, int x, int y){
     glm::vec3 Direction;
     glm::vec3 Right;
     float dirAbs;
-    float vel = 5;
-    float angle = 5;
+    float vel = 1;
+    float angle = 1;
     switch(key){
         case 'w':
             Direction = cam->camPos - cam->targetPos;

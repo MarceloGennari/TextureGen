@@ -198,9 +198,13 @@ int main(int argc, char *argv[])
     Camera::getCam()->pitch = 0;
     Camera::getCam()->yaw = 90.0f;
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
-    Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
+    //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
-    //Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
+    Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
 
+    std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,5,504);
+
+
+    glutMainLoop();
     return 0;
 }

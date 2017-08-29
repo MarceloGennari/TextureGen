@@ -9,6 +9,8 @@
 class Image{
     public:
         Image(std::string const &path, std::string const &ppmORpgm);
+        Image(int width, int height, unsigned char *Arr, std::string grORrgb);
+        Image(){}
         ~Image();
 
         void Display();
@@ -16,6 +18,7 @@ class Image{
         void setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b);
         void setPixel(int x, int y, unsigned char gr);
         void setGray(unsigned char *gr){free(gray); gray = gr;}
+        void setRGB(unsigned char *rgbArr){free(rgb); rgb = rgbArr;}
         void getPixel(int x, int y, unsigned char &r, unsigned char &g, unsigned char &b);
         void getPixel(int x, int y, unsigned char &gr);
         int getWidth(){return width;}
@@ -24,8 +27,8 @@ class Image{
 
     private:
         int width, height;
-        unsigned char *rgb;
-        unsigned char *gray;
+        unsigned char *rgb = NULL;
+        unsigned char *gray = NULL;
 
         void loadPPM(std::string const &path);
         void getGrayScale();

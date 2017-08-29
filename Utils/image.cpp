@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 
+
+
 Image::Image(std::string const &path, std::string const &ppmORpgm)
 {
     if(ppmORpgm == "ppm"){
@@ -14,14 +16,29 @@ Image::Image(std::string const &path, std::string const &ppmORpgm)
         // Makes sure that the class member gray is populated
         getGrayScale();
     }
-
 }
 
+Image::Image(int width, int height, unsigned char *Arr, std::string grORrgb){
+    this->width = width;
+    this->height = height;
+    if(grORrgb == "gray"){
+        this->gray = Arr;
+        this->rgb = NULL;
+    } else if(grORrgb == "rgb" ){
+        this->rgb = Arr;
+        getGrayScale();
+    }
+}
+
+
 Image::~Image(){
-    free(rgb);
-    free(gray);
-    rgb = NULL;
-    gray = NULL;
+//    if(rgb)
+//        free(rgb);
+//    if(gray)
+//        free(gray);
+
+//    rgb = NULL;
+//    gray = NULL;
 }
 
 void Image::loadPPM(std::string const &path){

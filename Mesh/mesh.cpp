@@ -36,7 +36,7 @@ void Mesh::Draw(Shader shader){
     else
         shader.setBool("isTex", 1);
     // draw mesh
-    //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);

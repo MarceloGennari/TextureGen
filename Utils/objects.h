@@ -10,9 +10,18 @@
 #include <assimp/postprocess.h>
 #include "image.h"
 
-namespace ImageFilters{
-    unsigned char * horLPF(Image &im);
-    unsigned char * verLPF(Image &im);
+
+
+namespace ImageProcessing{
+
+    namespace ImageFilters{
+        unsigned char * horLPF(Image &im);
+        unsigned char * verLPF(Image &im);
+    }
+
+    unsigned char * absVerDiff(Image &im);
+    unsigned char * absHorDiff(Image &im);
+    float calcBlur(Image &im);
 }
 
 struct Vertex{
@@ -87,6 +96,27 @@ struct less_than_cost
     }
 };
 
+struct Frame{
+    Image *frame;
+    float blur;
+    int frameNr;
+};
+
+struct less_than_blur
+{
+    inline bool operator() (const Frame* struct1, const Frame* struct2)
+    {
+        return (struct1->blur < struct2->blur);
+    }
+};
+
+struct less_than_Nr
+{
+    inline bool operator() (const Frame *struct1, const Frame* struct2)
+    {
+        return (struct1->frameNr < struct2->frameNr);
+    }
+};
 
 
 #endif // OBJECTS_H
