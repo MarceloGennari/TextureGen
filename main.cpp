@@ -202,15 +202,5 @@ int main(int argc, char *argv[])
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
     //Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
 
-    TextureEngine::SaptiotemporalEngine::testingSTB();
-
-    Image im("/home/marcelo/TextureGen/Teddy/Frames/0455.ppm", "ppm");
-    im.setPixel(1,480,255,255,255);
-
-    im.Display();
-    im.getGrayScale();
-    im.displayGray();
-
-    glutMainLoop();
     return 0;
 }

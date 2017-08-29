@@ -2,6 +2,19 @@
 #define OBJECTS_H
 
 #include <vector>
+#include "glm/common.hpp"
+#include <string>
+#include "glm/matrix.hpp"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include "image.h"
+
+namespace ImageFilters{
+    unsigned char * horLPF(Image &im);
+    unsigned char * verLPF(Image &im);
+}
+
 struct Vertex{
     glm::vec3 Pos;
     glm::vec3 Normal;

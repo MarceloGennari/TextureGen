@@ -6,10 +6,13 @@
 #include <string>
 #include <sstream>
 
-Image::Image(std::string const &path, std::string const &ppm)
+Image::Image(std::string const &path, std::string const &ppmORpgm)
 {
-    if(ppm == "ppm"){
+    if(ppmORpgm == "ppm"){
         loadPPM(path);
+
+        // Makes sure that the class member gray is populated
+        getGrayScale();
     }
 
 }
@@ -22,10 +25,6 @@ Image::~Image(){
 }
 
 void Image::loadPPM(std::string const &path){
-
-
-
-
     // Note that we need to read binary PGM
     // The second argument specify that the stream will be interpreted as binary
     // The other ios::in specify that it will be used as input, not output
@@ -268,7 +267,12 @@ void Image::displayGray(){
        glutSwapBuffers();
 }
 
-void Image::setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b){
+
+/**************
+ *  Methods for RGB Image Manipulation
+ * ************/
+
+void Image::setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b){    
     /* The idea here is to convert from the matrix format to the stream of data format
      * */
     int index = 0;
@@ -280,7 +284,40 @@ void Image::setPixel(int x, int y, unsigned char r, unsigned char g, unsigned ch
     rgb[index] = b;
 }
 
+void Image::getPixel(int x, int y, unsigned char &r, unsigned char &g, unsigned char &b){
+    /* The idea is to convert from the matrix format to the stream format
+     * */
+    int index = 0;
+    index = (y-1)*3*width;
+    index = index + (x-1)*3;
+    r = rgb[index++];
+    g = rgb[index++];
+    b = rgb[index];
+}
 
+/**************
+ *  Overloaded methods for Grayscale Image Manipulation
+ * ************/
+
+void Image::setPixel(int x, int y, unsigned char gr){
+    /* The idea is again convert the matrix format to the stream of data format
+     * However, since it is using grayscale, it is a bit different:
+     * */
+    int index = 0;
+    index = (y-1)*width;
+    index = index + (x-1);
+    gray[index] = gr;
+}
+
+void Image::getPixel(int x, int y, unsigned char &gr){
+    /* The idea is again convert the matrix format to the stream of data format
+     * However, since it is using grayscale, it is a bit different:
+     * */
+    int index = 0;
+    index = (y-1)*width;
+    index = index + (x-1);
+    gr = gray[index];
+}
 
 
 

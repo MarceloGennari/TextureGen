@@ -3,6 +3,7 @@
 
 #include "mesh.h"
 #include "objects.h"
+#include "image.h"
 #include <iostream>
 
 namespace TextureEngine{
@@ -27,9 +28,7 @@ namespace TextureEngine{
     }
 
     namespace SaptiotemporalEngine{
-
-        void testingSTB();
-
+        void calcBlur(Image &im);
 
     }
 
