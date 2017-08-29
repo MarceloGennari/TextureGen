@@ -120,7 +120,7 @@ void render(){
      * Camera
      * ********/
     glm::mat4 model;
-    model = glm::rotate(model,glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+    model = glm::rotate(model,glm::radians(180.0f), glm::vec3(0.0f,1.0f,0.0f));
 
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
     glutIdleFunc(render);
 
     Camera::getCam()->setProjection(glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 500.f));
-    Camera::getCam()->setCamPos(glm::vec3(0.0f,0.0f, 200.0f));
+    Camera::getCam()->setCamPos(glm::vec3(0.0f,0.0f, 50.0f));
     Camera::getCam()->setUpPos(glm::vec3(0.0f, 1.0f, 0.0f));
     Camera::getCam()->setTargetPos(glm::vec3(0.0f, 10.0f, 0.0f));
 
@@ -200,9 +200,9 @@ int main(int argc, char *argv[])
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
-    Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
+    Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy/mesh.stl");
 
-    std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,5,504);
+    //std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,5,504);
 
 
     glutMainLoop();
