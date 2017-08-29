@@ -8,14 +8,22 @@
 
 class Image{
     public:
-        Image();
-        std::vector<unsigned char> loadPGM(std::string const &path);
-        unsigned wchar_t * loadPPM(std::string const &path);
+        Image(std::string const &path, std::string const &ppm);
+        ~Image();
+
+        unsigned wchar_t * loadPGM(std::string const &path);
         void Display();
+        void displayGray();
+        void getGrayScale();
+        void setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b);
+
     private:
-        unsigned char * rgb;
-        unsigned wchar_t * ppm;
         int width, height;
+        unsigned char *rgb;
+        unsigned char *gray;
+
+        void loadPPM(std::string const &path);
+
 };
 
 #endif // IMAGE_H

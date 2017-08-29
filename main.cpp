@@ -202,20 +202,14 @@ int main(int argc, char *argv[])
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
     //Model::getModel()->loadModel("/home/marcelo/InfiniTAM/InfiniTAM-build/Apps/InfiniTAM/mesh.stl");
 
-    /*
-     *
-     * Apparently, the way that stbi_load works is that it loads rgb of each pixel sequentially
-     * That means that rgb[0] is red, rgb[1] is blue, rgb[2] is greeen, then rgb[3] is red
-     * So we have:
-     *          Red: if(i%3 == 0)
-     *          Green: if(i%3 == 1)
-     *          Blue: if(i%3 == 2);
-     * */
     TextureEngine::SaptiotemporalEngine::testingSTB();
-    Image im;
-    im.loadPGM("/home/marcelo/TextureGen/Teddy/Frames/0000.ppm");
-    im.Display();
 
+    Image im("/home/marcelo/TextureGen/Teddy/Frames/0455.ppm", "ppm");
+    im.setPixel(1,480,255,255,255);
+
+    im.Display();
+    im.getGrayScale();
+    im.displayGray();
 
     glutMainLoop();
     return 0;
