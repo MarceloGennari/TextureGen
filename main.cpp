@@ -120,7 +120,7 @@ void render(){
      * Camera
      * ********/
     glm::mat4 model;
-    model = glm::rotate(model,glm::radians(180.0f), glm::vec3(0.0f,1.0f,0.0f));
+    //model = glm::rotate(model,glm::radians(180.0f), glm::vec3(0.0f,1.0f,0.0f));
 
     glm::mat4 view = Camera::getCam()->getView();
     glm::mat4 projection = Camera::getCam()->getProjection();
@@ -179,24 +179,40 @@ int main(int argc, char *argv[])
     glewInit();
 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(600, 600);
+    glutInitWindowSize(640, 480);
     glutCreateWindow("Test");
     glutKeyboardFunc(Camera::keyBoardInput);
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-    Camera::getCam()->setProjection(glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 500.f));
-    Camera::getCam()->setCamPos(glm::vec3(0.0f,0.0f, 50.0f));
-    Camera::getCam()->setUpPos(glm::vec3(0.0f, 1.0f, 0.0f));
-    Camera::getCam()->setTargetPos(glm::vec3(0.0f, 10.0f, 0.0f));
+    glm::vec3 Translation;
+    glm::mat3 Rotation;
+    glm::mat4 Pose;
+
+
+    std::string frameNr = "349";
+    Camera::getCam()->getPose(frameNr, Rotation, Translation, Pose);
+    Camera::getCam()->initializeCalib();
+
+    Camera::getCam()->setProjection(glm::perspective(glm::radians(50.0f), 640.0f/480.0f, 0.2f, 1.0f));
+
+    /*
+     * Apparently, this Rotation Matrix and Translation Vector maps from 3D world coordinates to 3D Camera Coordinates
+     * Therefore, the camera position is not Translation, but -Rotation*Translation
+     * */
+    Camera::getCam()->setCamPos(-Rotation*Translation);
+    Camera::getCam()->setUpPos(Rotation*glm::vec3(0.0f, -1.0f, 0.0f));
+    Camera::getCam()->setTargetPos(Rotation*glm::vec3(0.0f, 0.0f, -1.0f));
 
     Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
                                           Camera::getCam()->getTargetPos(),
                                           Camera::getCam()->getUpPos()));
+    Camera::getCam()->setView(Pose);
     Camera::getCam()->lastX = 300;
     Camera::getCam()->lastY = 300;
     Camera::getCam()->pitch = 0;
     Camera::getCam()->yaw = 90.0f;
+
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
