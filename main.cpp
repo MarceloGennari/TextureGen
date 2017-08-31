@@ -185,33 +185,7 @@ int main(int argc, char *argv[])
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-    glm::vec3 Translation;
-    glm::mat3 Rotation;
-    glm::mat4 Pose;
-
-
-    std::string frameNr = "349";
-    Camera::getCam()->getPose(frameNr, Rotation, Translation, Pose);
-    Camera::getCam()->initializeCalib();
-
-    Camera::getCam()->setProjection(glm::perspective(glm::radians(50.0f), 640.0f/480.0f, 0.2f, 1.0f));
-
-    /*
-     * Apparently, this Rotation Matrix and Translation Vector maps from 3D world coordinates to 3D Camera Coordinates
-     * Therefore, the camera position is not Translation, but -Rotation*Translation
-     * */
-    Camera::getCam()->setCamPos(-Rotation*Translation);
-    Camera::getCam()->setUpPos(Rotation*glm::vec3(0.0f, -1.0f, 0.0f));
-    Camera::getCam()->setTargetPos(Rotation*glm::vec3(0.0f, 0.0f, -1.0f));
-
-    Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
-                                          Camera::getCam()->getTargetPos(),
-                                          Camera::getCam()->getUpPos()));
-    Camera::getCam()->setView(Pose);
-    Camera::getCam()->lastX = 300;
-    Camera::getCam()->lastY = 300;
-    Camera::getCam()->pitch = 0;
-    Camera::getCam()->yaw = 90.0f;
+    Camera::getCam()->positionCameraFrN("349");
 
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");

@@ -17,10 +17,9 @@ void Camera::keyBoardInput(unsigned char key, int x, int y){
     glm::vec3 Direction;
     glm::vec3 Right;
     float dirAbs;
-    float vel = 1;
+    float vel = 0.1;
     float angle = 1;
-    glm::mat4 Temp;
-    glm::vec3 newTarg;
+
     switch(key){
         case 'w':
             Direction = cam->camPos - cam->targetPos;
@@ -94,9 +93,6 @@ void Camera::keyBoardInput(unsigned char key, int x, int y){
             Direction = Direction*dirAbs;
             cam->setTargetPos( cam->camPos-Direction);
             break;
-        case 'n':
-            Temp = glm::rotate(Temp, glm::radians(1.0f), cam->getUpPos());
-            cam->setTargetPos(glm::vec3(Temp*glm::vec4(cam->getTargetPos(),1.0f)));
         default:
             break;
     }
@@ -167,6 +163,14 @@ void Camera::initializeCalib(){
 }
 
 void Camera::getPose(const std::string &frameNr, glm::mat3 &Rot, glm::vec3 &Tra, glm::mat4 &Pose){
+    /* Notice that these matrices map points from the world coordinates to the camera coordinates
+     * This means that in order to get the camera position in world coordinates from this, we have:
+     * CameraCoord = Rotation*Position + Translation
+     * Position = inverse(Rotation)*CameraCoord - inverse(Rotation)*Translation
+     *
+     * Also, since it is a Rotation Matrix, it has the property that inverse = transpose
+     * */
+
       std::string line;
       std::string path = "/home/marcelo/TextureGen/Teddy/Poses/Pose"+frameNr + ".txt";
       std::ifstream pose(path.c_str());
@@ -196,12 +200,40 @@ void Camera::getPose(const std::string &frameNr, glm::mat3 &Rot, glm::vec3 &Tra,
     for(int k = 12; k<28; k++)
         std::istringstream( array[k] ) >> p[k-12];
 
-    // Remember that glm::mat3 is stored column-wise
+    // Remember that glm::mat3 is stored column-wise in the same way as infiniTAM
     Rot = glm::make_mat3(m);
-    Rot = glm::transpose(Rot);
+    //Rot = glm::transpose(Rot); // This makes Rot = Rot^-1
     Pose = glm::make_mat4(p);
     Pose = glm::transpose(Pose);
     Tra = glm::vec3(t[0], t[1], t[2]);
+}
+
+void Camera::positionCameraFrN(const std::string &n){
+    glm::vec3 Translation;
+    glm::vec3 Direction;
+    glm::mat3 Rotation;
+    glm::mat3 invRotation;
+    glm::mat4 Pose;
+
+    Camera::getCam()->getPose(n, Rotation, Translation, Pose);
+    Camera::getCam()->initializeCalib();
+    Camera::getCam()->setProjection(glm::perspective(glm::radians(50.0f), 640.0f/480.0f, 0.2f, 10.0f));
+    /*
+     * Apparently, this Rotation Matrix and Translation Vector maps from 3D world coordinates to 3D Camera Coordinates
+     * Therefore, the camera position is not Translation, but -invRotation*Translation
+     *
+     * The Initial Direction of the camera is -1.0fz and the Initial Up Direction is -1.0fy
+     * */
+
+    invRotation = glm::transpose(Rotation);
+    Camera::getCam()->setCamPos(-invRotation*Translation);
+    Direction = glm::vec3(0.0f, 0.0f, -1.0f);
+    Direction = invRotation*Direction;
+    Camera::getCam()->setUpPos(invRotation*glm::vec3(0.0f, -1.0f, 0.0f));
+    Camera::getCam()->setTargetPos(Camera::getCam()->getCamPos() - Direction);
+    Camera::getCam()->setView(glm::lookAt(Camera::getCam()->getCamPos(),
+                                          Camera::getCam()->getTargetPos(),
+                                          Camera::getCam()->getUpPos()));
 }
 
 void Camera::updateView(){

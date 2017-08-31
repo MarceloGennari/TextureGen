@@ -36,10 +36,8 @@ public:
     void setCamPos(glm::vec3 camPos);
     void setUpPos(glm::vec3 upPos);
     void setTargetPos(glm::vec3 targetPos);
+    void positionCameraFrN(const std::string &n);
     void initializeCalib();
-
-    int lastX, lastY;
-    float yaw, pitch;
 
 private:
     static Camera* cam;
