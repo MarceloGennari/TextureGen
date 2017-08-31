@@ -10,8 +10,6 @@ Model* Model::m;
 Model::Model(){}
 
 void Model::Draw(Shader shader){
-
-
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].Draw(shader);
 
@@ -68,6 +66,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;
+
+
+
         // texture coordinates
         if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
         {
@@ -104,6 +105,14 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         for(unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
+
+
+    TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
+    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, "349");
+
+
+
+
     // process materials
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
     // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -127,13 +136,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
-
-    /* Notice that when the File is .stl, there will be loads of repeated vertices.
-     * This is because stl doesn't use EBOs
-     * So the next function tries to rectify this by assigning the right indices to the right vertices.
-     * **/
-    TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
-
     return Mesh(vertices, indices, textures);
 }
 

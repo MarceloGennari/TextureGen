@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-    Camera::getCam()->positionCameraFrN("349");
+    //Camera::getCam()->positionCameraFrN("349");
 
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");

@@ -31,6 +31,11 @@ namespace TextureEngine{
         std::vector<Frame *> temporalSampling(int sigMax, int sigMin, int nrFrames);
     }
 
+    namespace TextureMapGenEngine {
+        void getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind,const std::string &frN);
+        glm::vec2 project(glm::vec3 &vs);
+    }
+
 
 }
 

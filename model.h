@@ -23,6 +23,7 @@ public:
      }
      void Draw(Shader shader);
      void loadModel(std::string path);
+     std::vector<Mesh> * getMeshes(){return &meshes;}
  private:
      static Model* m;
 
