@@ -115,6 +115,10 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
     // process materials
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    aiString str("0397.ppm");
+    const char pKey = 5;
+    material->AddProperty(&str,&pKey, aiTextureType_DIFFUSE);
+    int k =material->GetTextureCount(aiTextureType_DIFFUSE);
     // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
     // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
     // Same applies to other texture as the following list summarizes:
