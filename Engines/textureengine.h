@@ -32,7 +32,7 @@ namespace TextureEngine{
     }
 
     namespace TextureMapGenEngine {
-        void getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind,const std::string &frN);
+        void getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame);
         glm::vec2 project(glm::vec3 &vs);
     }
 

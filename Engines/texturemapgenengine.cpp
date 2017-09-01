@@ -9,15 +9,12 @@
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
-void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, const std::string &frN){
+void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame){
 
-    // Getting the Key Frames
-    std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
-
-    std::string nr = SSTR(frames[15]->frameNr);
+    std::string nr = SSTR(frame->frameNr);
 
     Camera::getCam()->positionCameraFrN(nr);
-    Image *im  = frames[15]->frame;
+    Image *im  = frame->frame;
 
     // Projecting the Vertices to the RGB coordinate
     for(int k =0; k<vs.size(); k++){
@@ -34,7 +31,7 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
         pos.y = pos.y + 3;
 
 
-        if(pos.x<=640&&pos.x>0&&pos.y<=480&&pos.y>0 && posCamCoord.z>-0.7f){
+        if(pos.x<=640&&pos.x>0&&pos.y<=480&&pos.y>0 && posCamCoord.z>-3.0f /*This is a bit of a hack for now to restrict the distance from the camera*/){
             pos.x = 641-pos.x;
             im->setPixel(pos.x, pos.y, 255, 0, 0);
             vs[k].TexCoords.x = pos.x/640;

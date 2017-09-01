@@ -5,6 +5,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define SSTR( x ) static_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
+
+
 Model* Model::m;
 
 Model::Model(){}
@@ -106,12 +110,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             indices.push_back(face.mIndices[j]);
     }
 
-    TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
-    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, "349");
-
-
-
-
     // process materials
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
@@ -135,12 +133,37 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<TextureS> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+
+    /* WHOLE ALGORITHM */
+
+
+    TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
+
+    /* This part loads the Textures from the sample keys
+     *
+     *
+     * */
+    // Getting the Key Frames
+    std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
+    int frameInd = 6;
+    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+    std::string nr = SSTR(frames[frameInd]->frameNr);
     TextureS texture;
-    aiString str("Frames/0397.ppm");
+    aiString str("Frames/0"+nr+".ppm");
     texture.id = TextureFromFile(str.C_Str(), this->directory);
     texture.type = "texture_diffuse";
     texture.path = str;
     textures.push_back(texture);
+
+    frameInd = 17;
+    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+    nr = SSTR(frames[frameInd]->frameNr);
+    TextureS texture2;
+    aiString str2("Frames/0"+nr+".ppm");
+    texture2.id = TextureFromFile(str2.C_Str(), this->directory);
+    texture2.type = "texture_diffuse";
+    texture2.path = str2;
+    textures.push_back(texture2);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
