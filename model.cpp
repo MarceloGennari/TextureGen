@@ -17,7 +17,7 @@ void Model::Draw(Shader shader){
 
 void Model::loadModel(std::string path){
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -106,7 +106,6 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             indices.push_back(face.mIndices[j]);
     }
 
-
     TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
     TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, "349");
 
@@ -115,10 +114,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
     // process materials
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-    aiString str("0397.ppm");
-    const char pKey = 5;
-    material->AddProperty(&str,&pKey, aiTextureType_DIFFUSE);
-    int k =material->GetTextureCount(aiTextureType_DIFFUSE);
+
     // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
     // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
     // Same applies to other texture as the following list summarizes:
@@ -138,6 +134,13 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // 4. height maps
     std::vector<TextureS> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+    TextureS texture;
+    aiString str("Frames/0397.ppm");
+    texture.id = TextureFromFile(str.C_Str(), this->directory);
+    texture.type = "texture_diffuse";
+    texture.path = str;
+    textures.push_back(texture);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);

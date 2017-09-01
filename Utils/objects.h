@@ -62,6 +62,7 @@ struct TextureS{
     std::string type;
     aiString path;
 };
+
 struct Pair{
     std::pair<unsigned int, unsigned int> vecPair;
     Vertex contVert;

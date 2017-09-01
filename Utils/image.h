@@ -32,6 +32,6 @@ class Image{
 
         void loadPPM(std::string const &path);
         void getGrayScale();
+        void static mainLoop();
 };
-
 #endif // IMAGE_H

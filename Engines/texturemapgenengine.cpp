@@ -4,6 +4,7 @@
 #include "objects.h"
 
 #include <sstream>
+#include <cmath>
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -28,18 +29,17 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
         glm::vec2 pos = project(posCamCoord);
         pos = glm::vec2(floor(pos.x), floor(pos.y));
 
-        //For some reason, the image ends up bein a bit displaced. This accounts for that
+        //For some reason, the image ends up being a bit displaced. This accounts for that
         pos.x = pos.x - 64;
         pos.y = pos.y + 3;
 
 
-        if(pos.x<=640&&pos.x>0&&pos.y<=480&&pos.y>0){
+        if(pos.x<=640&&pos.x>0&&pos.y<=480&&pos.y>0 && posCamCoord.z>-0.7f){
             pos.x = 641-pos.x;
             im->setPixel(pos.x, pos.y, 255, 0, 0);
+            vs[k].TexCoords.x = pos.x/640;
+            vs[k].TexCoords.y = pos.y/480;
         }
-
-        vs[k].TexCoords.x = pos.x;
-        vs[k].TexCoords.y = pos.y;
     }
 
 

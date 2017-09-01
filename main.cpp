@@ -166,7 +166,7 @@ void render(){
 
 //    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    m.Draw(sh);
+    //m.Draw(sh);
     Model::getModel()->Draw(sh);
 
     glutSwapBuffers();
@@ -174,10 +174,11 @@ void render(){
 
 int main(int argc, char *argv[])
 {
+
+
     glutInit(&argc, argv);
     glewExperimental = GL_TRUE;
     glewInit();
-
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(640, 480);
     glutCreateWindow("Test");
@@ -185,14 +186,13 @@ int main(int argc, char *argv[])
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-    //Camera::getCam()->positionCameraFrN("349");
+    Camera::getCam()->positionCameraFrN("349");
 
     //Model::getModel()->loadModel("/home/marcelo/Downloads/nanosuit/nanosuit.obj");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/Species/files/maui_dolphin.stl");
     //Model::getModel()->loadModel("/home/marcelo/Downloads/EliteKnight/EliteKnight.stl");
     Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy/mesh.stl");
 
-    //std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,5,504);
 
 
     glutMainLoop();

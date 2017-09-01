@@ -29,7 +29,10 @@ void main()
     vec3 result = (ambient+diffuse)*objectColour;
 
     if(isTex==1){
-        FragColor = texture(texture1, atexCoord);
+        if(atexCoord.x>0.0f)
+            FragColor = texture(texture1, atexCoord);
+        else
+            FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
     } else {
         FragColor = vec4(result, 1);
     }

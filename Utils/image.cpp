@@ -115,6 +115,11 @@ void Image::loadPPM(std::string const &path){
         file.close();
     }
 }
+
+void Image::mainLoop(){
+
+}
+
 void Image::Display(){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(width, height);
@@ -189,9 +194,8 @@ void Image::Display(){
        glBindVertexArray(VAO);
        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-       // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-       // -------------------------------------------------------------------------------
        glutSwapBuffers();
+       // It is not safe to have multiple windows and not have callbacks for each of them
 }
 
 void Image::getGrayScale(){
