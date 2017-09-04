@@ -82,23 +82,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
             vertex.TexCoords = vec;
+
+            vec.x = mesh->mTextureCoords[0][i].x;
+            vec.y = mesh->mTextureCoords[0][i].y;
+            vertex.TexCoords2 = vec;
         }
-        else
+        else{
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-        // tangent
-        if(mesh->mTangents != NULL){
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
-            vertex.Tangent = vector;
+            vertex.TexCoords2 = glm::vec2(0.0f, 0.0f);
         }
-        // bitangent
-        if(mesh->mBitangents !=NULL){
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
-            vertex.Bitangent = vector;
-        }
+
         vertices.push_back(vertex);
     }
     // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
@@ -145,8 +138,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
      * */
     // Getting the Key Frames
     std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
-    int frameInd = 6;
-    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+    int frameInd = 4;
+    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 1);
     std::string nr = SSTR(frames[frameInd]->frameNr);
     TextureS texture;
     aiString str("Frames/0"+nr+".ppm");
@@ -155,8 +148,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     texture.path = str;
     textures.push_back(texture);
 
-//    frameInd = 17;
-//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+//    frameInd = 8;
+//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 2);
 //    nr = SSTR(frames[frameInd]->frameNr);
 //    TextureS texture2;
 //    aiString str2("Frames/0"+nr+".ppm");
@@ -164,6 +157,16 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 //    texture2.type = "texture_diffuse";
 //    texture2.path = str2;
 //    textures.push_back(texture2);
+
+//    frameInd = 16;
+//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 3);
+//    nr = SSTR(frames[frameInd]->frameNr);
+//    TextureS texture3;
+//    aiString str3("Frames/0"+nr+".ppm");
+//    texture3.id = TextureFromFile(str3.C_Str(), this->directory);
+//    texture3.type = "texture_diffuse";
+//    texture3.path = str3;
+//    textures.push_back(texture3);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
