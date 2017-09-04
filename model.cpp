@@ -155,15 +155,15 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     texture.path = str;
     textures.push_back(texture);
 
-    frameInd = 17;
-    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
-    nr = SSTR(frames[frameInd]->frameNr);
-    TextureS texture2;
-    aiString str2("Frames/0"+nr+".ppm");
-    texture2.id = TextureFromFile(str2.C_Str(), this->directory);
-    texture2.type = "texture_diffuse";
-    texture2.path = str2;
-    textures.push_back(texture2);
+//    frameInd = 17;
+//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+//    nr = SSTR(frames[frameInd]->frameNr);
+//    TextureS texture2;
+//    aiString str2("Frames/0"+nr+".ppm");
+//    texture2.id = TextureFromFile(str2.C_Str(), this->directory);
+//    texture2.type = "texture_diffuse";
+//    texture2.path = str2;
+//    textures.push_back(texture2);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
