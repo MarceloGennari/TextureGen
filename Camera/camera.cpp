@@ -217,7 +217,7 @@ void Camera::positionCameraFrN(const std::string &n){
 
     Camera::getCam()->getPose(n, Rotation, Translation, Pose);
     Camera::getCam()->initializeCalib();
-    Camera::getCam()->setProjection(glm::perspective(glm::radians(50.0f), 640.0f/480.0f, 0.2f, 10.0f));
+    Camera::getCam()->setProjection(glm::perspective(glm::radians(50.0f), 640.0f/480.0f, 0.05f, 10.0f));
     /*
      * Apparently, this Rotation Matrix and Translation Vector maps from 3D world coordinates to 3D Camera Coordinates
      * Therefore, the camera position is not Translation, but -invRotation*Translation

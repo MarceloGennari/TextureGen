@@ -28,8 +28,9 @@ struct Vertex{
     glm::vec3 Pos;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
-    glm::vec3 Tangent;
-    glm::vec3 Bitangent;
+    glm::vec2 TexCoords2;
+    glm::vec2 TexCoords3;
+    float zDepth;
 };
 
 struct VertInd{
@@ -98,6 +99,8 @@ struct less_than_cost
 };
 
 struct Frame{
+    // Note that frame #1 has the pose #2
+    // So that frame #503 has the pose #504
     Image *frame;
     float blur;
     int frameNr;

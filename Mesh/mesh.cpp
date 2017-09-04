@@ -28,8 +28,10 @@ void Mesh::Draw(Shader shader){
         shader.setFloat(("material." + name + number).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
-    glActiveTexture(GL_TEXTURE0);
 
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
+    shader.setInt("texture3", 2);
     shader.use();
     if (textures.size()==0)
         shader.setBool("isTex", 0);
@@ -71,6 +73,14 @@ void Mesh::setUpMesh(){
        // vertex texture coords
        glEnableVertexAttribArray(2);
        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+       // vertex texture coords
+       glEnableVertexAttribArray(3);
+       glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords2));
+
+       // vertex texture coords
+       glEnableVertexAttribArray(4);
+       glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords3));
 
        glBindVertexArray(0);
 }
