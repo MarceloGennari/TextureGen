@@ -34,6 +34,7 @@ namespace TextureEngine{
     namespace TextureMapGenEngine {
         void getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame, int nF);
         glm::vec2 project(glm::vec3 &vs);
+        std::vector<Vertex *> zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
     }
 
 
