@@ -139,8 +139,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // Getting the Key Frames
     std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
-    int frameInd = 4;
-    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 1);
+    int frameInd = 5;
+    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
     std::string nr = SSTR(frames[frameInd]->frameNr);
     TextureS texture;
     aiString str("Frames/0"+nr+".ppm");
