@@ -25,12 +25,13 @@ namespace ImageProcessing{
 }
 
 struct Vertex{
-    glm::vec3 Pos;
+    glm::vec3 Pos; // Position of the vector in 3D
     glm::vec3 Normal;
     glm::vec2 TexCoords;
-    glm::vec2 TexCoords2;
+    glm::vec2 TexCoords2; // Additional coordinates for the case of multitexturing
     glm::vec2 TexCoords3;
-    float zDepth;
+    std::vector<int> faces; // This is a list of all of the faces that this vertex is part of
+    float zDepth; // This is the zDepth of when this vertex is projected used in TextureGenEngine
 };
 
 struct VertInd{

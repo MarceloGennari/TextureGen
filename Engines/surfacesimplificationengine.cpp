@@ -202,8 +202,19 @@ void TextureEngine::SurfaceSimplificationEngine::unRepVert(std::vector<Vertex> &
         vSort.push_back(v);
     }
 
+
     // This sorts the vertex with the indeces based on whether their position are the same
     std::sort(vSort.begin(), vSort.end(), VertSort());
+
+    // Stores the  list of faces in the first element of the vertex
+    for(int k =0; k<vSort.size();){
+        int counter = k;
+        VertInd* v = &vSort[counter];
+        do{
+            v->v.faces.push_back(floor(vSort[k].ind/3));
+            k++;
+        } while(v->v.Pos==vSort[k].v.Pos);
+    }
 
     // Retrieve the list of vertex
     for(unsigned int w=0; w<vSort.size(); w++){
