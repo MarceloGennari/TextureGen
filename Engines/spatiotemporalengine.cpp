@@ -16,7 +16,7 @@ std::vector<Frame *> TextureEngine::SaptiotemporalEngine::temporalSampling(int s
     std::vector<Frame *> frames;
     std::string root = "/home/marcelo/TextureGen/Teddy/Frames/";
     for(int k = 0; k < nrFrames; k++){
-        std::string st;
+        std::string st, st2;
 
         if(k<10){
             st = root + "000" + SSTR(k) + ".ppm";
@@ -24,6 +24,14 @@ std::vector<Frame *> TextureEngine::SaptiotemporalEngine::temporalSampling(int s
             st = root + "00" + SSTR(k) + ".ppm";
         } else if(k<1000){
             st = root + "0" + SSTR(k) + ".ppm";
+        }
+
+        if(k<10){
+            st2 = root + "000" + SSTR(k) + ".pgm";
+        } else if(k<100){
+            st2 = root + "00" + SSTR(k) + ".pgm";
+        } else if(k<1000){
+            st2 = root + "0" + SSTR(k) + ".pgm";
         }
 
         Image *im = new Image(st, "ppm");

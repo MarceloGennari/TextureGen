@@ -29,9 +29,9 @@ class Image{
         int width, height;
         unsigned char *rgb = NULL;
         unsigned char *gray = NULL;
+        wchar_t *greyPGM = NULL;
 
         void loadPPM(std::string const &path);
-        void loadPGM(std::string const &path);
         void getGrayScale();
         void static mainLoop();
 };
