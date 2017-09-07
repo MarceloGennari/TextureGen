@@ -15,29 +15,48 @@ bool sortP(glm::vec2 a, glm::vec2 b){
     return a.x<b.x;
 }
 
-bool isInsideTriangle(glm::vec2 TexCoord, std::vector<glm::vec2> Face){
-    /* This just tests whether the point TexCoord is inside the Face (which is a vector of three points in the image)
-     * This uses the method of Same Side Technique
-     * */
-    glm::vec2 p1 = Face[0];
-    glm::vec2 p2 = Face[1];
-    glm::vec2 p3 = Face[2];
-
-
-}
-
 void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame){
 
-    // This will contain a pointer to all of the vertices that fall within the contraint above
-    std::vector<unsigned int> verticesInsideImage;
-    std::vector<int> faces;
-
-    // This is the list of vertices per pixel
+        // This is the list of vertices per pixel
     std::vector<std::vector<std::vector<Vertex *> > > verticesInPixel;
     verticesInPixel.resize(frame->frame->getWidth());
     for(int k = 0; k<frame->frame->getWidth(); k++){
         verticesInPixel[k].resize(frame->frame->getHeight());
     }
+
+    // This creates a vector of vertices that project to the pixel x,y
+    std::string nr = SSTR(frame->frameNr-1);
+    Camera::getCam()->positionCameraFrN(nr);
+
+    std::vector<std::vector<float> > depthPixels = zBuffering(vs, ind, verticesInPixel, frame);
+
+    // Now that we have all of the depths and all of the pixels, we can eliminate those vertices that are behind the pixel
+    for(int w = 0; w<frame->frame->getWidth(); w++){
+        for(int h = 0; h<frame->frame->getHeight(); h++){
+            for(int v = 0; v<verticesInPixel[w][h].size(); v++){
+                if(verticesInPixel[w][h][v]->zDepth>1.01*depthPixels[w][h]){
+                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
+                } else {
+                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, verticesInPixel[w][h][v]->TexCoords.y/(480*2));
+                }
+            }
+        }
+    }
+}
+
+glm::vec2 TextureEngine::TextureMapGenEngine::project(glm::vec3 &vs){
+    return glm::vec2(((vs.x*Camera::getCam()->getFocal().x)/vs.z)+Camera::getCam()->getPrinc().x,
+                     ((vs.y*Camera::getCam()->getFocal().y)/vs.z)+Camera::getCam()->getPrinc().y);
+}
+
+std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<std::vector<std::vector<Vertex *> > > &verticesInPixel, Frame* frame){
+
+    // This will hopefully solve the zBuffering problem from the texture generation
+    /* The idea of the algorithm is:
+     * Given the pose of the camera, the map and the projected points:
+     * We calculate the z-Buffer value for each pixel and we give a list of vertices in each pixel
+     * */
+
     // This is the z-Buffer and will store the lowest value of the depth for each pixel in the image
     std::vector<std::vector<float> > depthPixels;
     depthPixels.resize(frame->frame->getWidth());
@@ -45,21 +64,19 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
         depthPixels[k].resize(frame->frame->getHeight());
     }
 
-    // This creates a vector of vertices that project to the pixel x,y
-    std::string nr = SSTR(frame->frameNr-1);
-    Camera::getCam()->positionCameraFrN(nr);
+    // This will contain a pointer to all of the vertices that fall within the contraint above
+    std::vector<unsigned int> verticesInsideImage;
+    std::vector<int> faces;
 
     // Projecting the Vertices to the RGB coordinate
     for(int k =0; k<vs.size(); k++){
         glm::vec3 posCamCoord = glm::vec3(Camera::getCam()->getView()*glm::vec4(vs[k].Pos, 1.0f));
-//        glm::vec4 posCamCoord2 = Camera::getCam()->getKMat()*posDepthCam;
-//        glm::vec3 posCamCoord = glm::vec3(posCamCoord2.x/posCamCoord2.w, posCamCoord2.y/posCamCoord2.w, posCamCoord2.z/posCamCoord2.w);
         glm::vec2 position = project(posCamCoord);
         glm::vec2 pixel = glm::vec2(round(position.x), round(position.y));
 
+        // Those two are hacks because the camera pose is not right or I don't know exactly how to use the poses
         pixel.y = pixel.y +5;
         pixel.x = pixel.x -70;
-
         position.y = position.y +5;
         position.x = position.x -70;
 
@@ -175,37 +192,7 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
         }
     }
 
-    // Now that we have all of the depths and all of the pixels, we can eliminate those vertices that are behind the pixel
-    for(int w = 0; w<frame->frame->getWidth(); w++){
-        for(int h = 0; h<frame->frame->getHeight(); h++){
-            for(int v = 0; v<verticesInPixel[w][h].size(); v++){
-                if(verticesInPixel[w][h][v]->zDepth>1.01*depthPixels[w][h]){
-                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
-                } else {
-                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, verticesInPixel[w][h][v]->TexCoords.y/480);
-                }
-            }
-        }
-    }
 
-}
-
-glm::vec2 TextureEngine::TextureMapGenEngine::project(glm::vec3 &vs){
-    return glm::vec2(((vs.x*Camera::getCam()->getFocal().x)/vs.z)+Camera::getCam()->getPrinc().x,
-                     ((vs.y*Camera::getCam()->getFocal().y)/vs.z)+Camera::getCam()->getPrinc().y);
-}
-
-std::vector<Vertex *> TextureEngine::TextureMapGenEngine::zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
-
-    // This will hopefully solve the zBuffering problem from the texture generation
-    /* The idea of the algorithm is:
-     * Given all of the vertices and the faces projected in the image
-     * We go iteratively and destroy the vertices that are behind the faces
-     * For that we need to know:
-     * Is the vertice inside one of the faces?
-     * If this vertice is inside one of the faces, is it in front or behind the face?
-     * If it is behind, then we set the texture coordinate to zero
-     * If it is in front, the we set the texture coordinate to that value
-     * */
+    return depthPixels;
 }
 

@@ -103,41 +103,14 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             indices.push_back(face.mIndices[j]);
     }
 
-    // process materials
-    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-
-    // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-    // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER.
-    // Same applies to other texture as the following list summarizes:
-    // diffuse: texture_diffuseN
-    // specular: texture_specularN
-    // normal: texture_normalN
-
-    // 1. diffuse maps
-    std::vector<TextureS> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-    // 2. specular maps
-    std::vector<TextureS> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-    // 3. normal maps
-    std::vector<TextureS> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-    textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-    // 4. height maps
-    std::vector<TextureS> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-    textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-
-
     /* WHOLE ALGORITHM */
-
 
     TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
 
     /* This part loads the Textures from the sample keys
-     *
-     *
      * */
     // Getting the Key Frames
-    std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
+    std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
     int frameInd = 9;
     TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
@@ -148,6 +121,11 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     texture.type = "texture_diffuse";
     texture.path = str;
     textures.push_back(texture);
+
+    /*
+     * The idea of this part is to load all of the textures from the SpatiotemporalEngine in a single texture
+     * using that texture we then reconstruct the scene
+     * */
 
 //    frameInd = 8;
 //    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 2);
@@ -214,7 +192,11 @@ unsigned int Model::TextureFromFile(const char *path, const std::string &directo
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    unsigned char *data2 = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    unsigned char *data = new unsigned char[width*height*nrComponents*2];
+    std::copy(data2, data2+width*height*nrComponents, data);
+    std::copy(data2, data2+width*height*nrComponents, data+width*height*nrComponents);
+
     if (data)
     {
         GLenum format;
@@ -226,7 +208,7 @@ unsigned int Model::TextureFromFile(const char *path, const std::string &directo
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height*2, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
