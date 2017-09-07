@@ -139,7 +139,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // Getting the Key Frames
     std::vector<Frame *>  frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
-    int frameInd = 5;
+    int frameInd = 9;
     TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
     std::string nr = SSTR(frames[frameInd]->frameNr);
     TextureS texture;
