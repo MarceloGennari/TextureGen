@@ -31,6 +31,7 @@ class Image{
         unsigned char *gray = NULL;
 
         void loadPPM(std::string const &path);
+        void loadPGM(std::string const &path);
         void getGrayScale();
         void static mainLoop();
 };

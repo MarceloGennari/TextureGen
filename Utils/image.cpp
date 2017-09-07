@@ -16,6 +16,10 @@ Image::Image(std::string const &path, std::string const &ppmORpgm)
         // Makes sure that the class member gray is populated
         getGrayScale();
     }
+
+    if(ppmORpgm == "pgm"){
+        loadPGM(path);
+    }
 }
 
 Image::Image(int width, int height, unsigned char *Arr, std::string grORrgb){
@@ -39,6 +43,81 @@ Image::~Image(){
 
 //    rgb = NULL;
 //    gray = NULL;
+}
+
+void Image::loadPGM(std::string const &path){
+    // Note that we need to read binary PGM
+    // The second argument specify that the stream will be interpreted as binary
+    // The other ios::in specify that it will be used as input, not output
+    /*
+     * In the PPM format, a couple of information is crucial:
+     * Since the width is given, the number of '\n' in the file is not the number of rows
+     * Whenever a * appears, it means that that line has the same content as the one above it
+     * */
+    // I am assuming here that the Format will be P6
+
+
+    std::fstream file(path.c_str(), std::ios::binary | std::ios::in);
+
+    if(!file.is_open()){
+        std::cout<< "Error" << std::endl;
+        // Throw an exception
+    } else {
+
+        char c;
+        /************** Header ************************/
+        // This gets the P3 / P6 etc file format
+        std::string format;
+        file.get(c);
+        format.push_back(c);
+        file.get(c);
+        format.push_back(c);
+        file.get(c);
+
+        if(format != "P6"){
+            std::cout << "Image format is not P6 PPM" << std::endl;
+            return;
+        }
+
+        /********** Width and Height *****************/
+        // This gets the width and height of the file
+        std::string wString, hString;
+
+        // Getting Width
+        do{
+            file.get(c);
+            wString.push_back(c);
+        }while(c!=' ');
+        std::istringstream convert(wString);
+        convert>>width;
+
+        // Getting Height
+        do{
+            file.get(c);
+            hString.push_back(c);
+        }while(c!='\n');
+        std::istringstream converth(hString);
+        converth>>height;
+        file.get(c);
+
+        /*************** Getting Size *****************/
+        while(c!='\n'){
+            file.get(c);
+        }
+        file.get(c);
+
+        /************* BODY *******************/
+        rgb = (unsigned char *)malloc(sizeof(unsigned char)*width*height*3);
+        int counter = 0;
+        do{
+            rgb[counter] = c;
+            counter++;
+            file.get(c);
+
+        }while(file.good());
+
+        file.close();
+    }
 }
 
 void Image::loadPPM(std::string const &path){

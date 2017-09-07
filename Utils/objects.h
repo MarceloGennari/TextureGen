@@ -32,6 +32,7 @@ struct Vertex{
     glm::vec2 TexCoords3;
     std::vector<int> faces; // This is a list of all of the faces that this vertex is part of
     float zDepth; // This is the zDepth of when this vertex is projected used in TextureGenEngine
+    bool assigned;
 };
 
 struct VertInd{

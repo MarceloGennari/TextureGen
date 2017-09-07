@@ -35,9 +35,9 @@ public:
      /*  Functions   */
      void processNode(aiNode *node, const aiScene *scene);
      Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-     std::vector<TextureS> loadMaterialTextures(aiMaterial *mat, aiTextureType type,
-                                          std::string typeName);
-     unsigned int TextureFromFile(const char *path, const std::string &directory);
+
+     unsigned int TextureFromFile(std::vector<aiString> path, const std::string &directory);
+     unsigned int TextureFromFile2(const char *path, const std::string &directory);
 
      std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
      void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);

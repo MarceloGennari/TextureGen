@@ -112,77 +112,105 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // Getting the Key Frames
     std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
-    int frameInd = 9;
-    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
-    std::string nr = SSTR(frames[frameInd]->frameNr);
-    TextureS texture;
-    aiString str("Frames/0"+nr+".ppm");
-    texture.id = TextureFromFile(str.C_Str(), this->directory);
-    texture.type = "texture_diffuse";
-    texture.path = str;
-    textures.push_back(texture);
+//    int frameInd = 9;
+//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+//    std::string nr = SSTR(frames[frameInd]->frameNr);
+//    TextureS texture;
+//    aiString str("Frames/0"+nr+".ppm");
+//    texture.id = TextureFromFile2(str.C_Str(), this->directory);
+//    texture.type = "texture_diffuse";
+//    textures.push_back(texture);
 
     /*
      * The idea of this part is to load all of the textures from the SpatiotemporalEngine in a single texture
      * using that texture we then reconstruct the scene
      * */
+    std::vector<aiString> st;
+    for(int k = 0; k < frames.size(); k++){
+        std::string s;
+        int frameNr = frames[k]->frameNr;
+        if(frameNr<10)
+            s ="Frames/000"+SSTR(frameNr)+".ppm";
+        else if(frameNr<100)
+            s = "Frames/00" + SSTR(frameNr) + ".ppm";
+        else if (frameNr<1000)
+            s = "Frames/0" + SSTR(frameNr) + ".ppm";
 
-//    frameInd = 8;
-//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 2);
-//    nr = SSTR(frames[frameInd]->frameNr);
-//    TextureS texture2;
-//    aiString str2("Frames/0"+nr+".ppm");
-//    texture2.id = TextureFromFile(str2.C_Str(), this->directory);
-//    texture2.type = "texture_diffuse";
-//    texture2.path = str2;
-//    textures.push_back(texture2);
+        aiString y(s);
+        st.push_back(y);
+    }
 
-//    frameInd = 16;
-//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 3);
-//    nr = SSTR(frames[frameInd]->frameNr);
-//    TextureS texture3;
-//    aiString str3("Frames/0"+nr+".ppm");
-//    texture3.id = TextureFromFile(str3.C_Str(), this->directory);
-//    texture3.type = "texture_diffuse";
-//    texture3.path = str3;
-//    textures.push_back(texture3);
+    for(int k = 0; k <frames.size(); k+=6)
+        TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, frames.size());
+
+    TextureS texture;
+    texture.id = TextureFromFile(st, this->directory);
+    texture.type = "texture_diffuse";
+    textures.push_back(texture);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<TextureS> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
-   {
-       std::vector<TextureS> textures;
-       for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-       {
-           aiString str;
-           mat->GetTexture(type, i, &str);
-           // check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-           bool skip = false;
-           for(unsigned int j = 0; j < textures_loaded.size(); j++)
-           {
-               if(std::strcmp(textures_loaded[j].path.C_Str(), str.C_Str()) == 0)
-               {
-                   textures.push_back(textures_loaded[j]);
-                   skip = true; // a texture with the same filepath has already been loaded, continue to next one. (optimization)
-                   break;
-               }
-           }
-           if(!skip)
-           {   // if texture hasn't been loaded already, load it
-               TextureS texture;
-               texture.id = TextureFromFile(str.C_Str(), this->directory);
-               texture.type = typeName;
-               texture.path = str;
-               textures.push_back(texture);
-               textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
-           }
-       }
-       return textures;
-   }
+unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::string &directory)
+{
+    glewInit();
 
-unsigned int Model::TextureFromFile(const char *path, const std::string &directory)
+    int width, height, nrComponents;
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int NrFrames = path.size();
+
+    std::string filename = std::string(path[0].C_Str());
+    filename = directory + '/' + filename;
+
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    int sizeData = width*height*nrComponents;
+
+    unsigned char* result = new unsigned char[width*height*nrComponents*NrFrames];
+    int sizeResult = 0;
+
+    std::copy(data, data+sizeData, result);
+    sizeResult = sizeResult + sizeData;
+
+    for(int k = 1; k<NrFrames; k++){
+        filename = std::string(path[k].C_Str());
+        filename = directory + '/' + filename;
+
+        int sizeData2 = width*height*nrComponents;
+        unsigned char *data2 = new unsigned char[sizeData2];
+        data2 = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+
+        std::copy(data2, data2+sizeData2, result+sizeResult);
+        sizeResult = sizeResult+sizeData2;
+    }
+
+
+    if (data)
+    {
+        GLenum format = GL_RGB;
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height*NrFrames, 0, format, GL_UNSIGNED_BYTE, result);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load" << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
+}
+
+unsigned int Model::TextureFromFile2(const char *path, const std::string &directory)
 {
     glewInit();
     std::string filename = std::string(path);
@@ -192,10 +220,7 @@ unsigned int Model::TextureFromFile(const char *path, const std::string &directo
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
-    unsigned char *data2 = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-    unsigned char *data = new unsigned char[width*height*nrComponents*2];
-    std::copy(data2, data2+width*height*nrComponents, data);
-    std::copy(data2, data2+width*height*nrComponents, data+width*height*nrComponents);
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 
     if (data)
     {

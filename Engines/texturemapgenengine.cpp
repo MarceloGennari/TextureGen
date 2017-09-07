@@ -15,7 +15,7 @@ bool sortP(glm::vec2 a, glm::vec2 b){
     return a.x<b.x;
 }
 
-void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame){
+void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame, int frNr, int totalFr){
 
         // This is the list of vertices per pixel
     std::vector<std::vector<std::vector<Vertex *> > > verticesInPixel;
@@ -34,10 +34,13 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
     for(int w = 0; w<frame->frame->getWidth(); w++){
         for(int h = 0; h<frame->frame->getHeight(); h++){
             for(int v = 0; v<verticesInPixel[w][h].size(); v++){
-                if(verticesInPixel[w][h][v]->zDepth>1.01*depthPixels[w][h]){
-                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
-                } else {
-                    verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, verticesInPixel[w][h][v]->TexCoords.y/(480*2));
+                if(!(verticesInPixel[w][h][v]->assigned)){
+                    if(verticesInPixel[w][h][v]->zDepth>1.05*depthPixels[w][h]){
+                        verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
+                    } else {
+                        verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, (verticesInPixel[w][h][v]->TexCoords.y/(480*totalFr))+((float)frNr/(float)totalFr));
+                        verticesInPixel[w][h][v]->assigned = true;
+                    }
                 }
             }
         }
@@ -80,7 +83,10 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
         position.y = position.y +5;
         position.x = position.x -70;
 
-        if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0){
+        // This is also limiting distance just in case things get strected because of the distance + the further the point the less accurate the projection will be
+        if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 2.0f){
+            if(vs[k].TexCoords.x>0) // This accounts for the case where a coordinate has already been assigned to that vertex
+                continue;
 
             position.x = 641-position.x;
             pixel.x = 641-pixel.x;
