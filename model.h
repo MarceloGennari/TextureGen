@@ -38,6 +38,7 @@ public:
 
      unsigned int TextureFromFile(std::vector<aiString> path, const std::string &directory);
      unsigned int TextureFromFile2(const char *path, const std::string &directory);
+     void TextureFromFile3(const char *path, const std::string &directory, GLuint arrayTexture, int frameNumber);
 
      std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
      void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);

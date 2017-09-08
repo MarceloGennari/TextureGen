@@ -110,41 +110,61 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // Getting the Key Frames
     std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
-//    int frameInd = 9;
-//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 9 ,1);
-//    std::string nr = SSTR(frames[frameInd]->frameNr);
-//    TextureS texture;
-//    aiString str("Frames/0"+nr+".ppm");
-//    texture.id = TextureFromFile2(str.C_Str(), this->directory);
-//    texture.type = "texture_diffuse";
-//    textures.push_back(texture);
+    glewInit();
+    GLuint arrayTexture;
+    glGenTextures(1,&arrayTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, arrayTexture);
+    glTexStorage3D(GL_TEXTURE_2D_ARRAY, 7, GL_RGB, 640, 480, 20);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    for(int k = 0; k<frames.size(); k++){
+        int frameInd = k;
+        TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, 1);
+        std::string nr = SSTR(frames[frameInd]->frameNr);
+        TextureS texture;
+        aiString str("Frames/0"+nr+".ppm");
+        TextureFromFile3(str.C_Str(), this->directory, arrayTexture, k);
+        texture.id = arrayTexture;
+        texture.type = "texture_diffuse";
+        textures.push_back(texture);
+    }
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, arrayTexture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     /*
      * The idea of this part is to load all of the textures from the SpatiotemporalEngine in a single texture
      * using that texture we then reconstruct the scene
      * */
-    std::vector<aiString> st;
-    for(int k = 0; k < frames.size(); k++){
-        std::string s;
-        int frameNr = frames[k]->frameNr;
-        if(frameNr<10)
-            s ="Frames/000"+SSTR(frameNr)+".ppm";
-        else if(frameNr<100)
-            s = "Frames/00" + SSTR(frameNr) + ".ppm";
-        else if (frameNr<1000)
-            s = "Frames/0" + SSTR(frameNr) + ".ppm";
+//    std::vector<aiString> st;
+//    for(int k = 0; k < frames.size(); k++){
+//        std::string s;
+//        int frameNr = frames[k]->frameNr;
+//        if(frameNr<10)
+//            s ="Frames/000"+SSTR(frameNr)+".ppm";
+//        else if(frameNr<100)
+//            s = "Frames/00" + SSTR(frameNr) + ".ppm";
+//        else if (frameNr<1000)
+//            s = "Frames/0" + SSTR(frameNr) + ".ppm";
 
-        aiString y(s);
-        st.push_back(y);
-    }
+//        aiString y(s);
+//        st.push_back(y);
+//    }
 
-    for(int k = 0; k <frames.size(); k+=6)
-        TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, frames.size());
+//    for(int k = 0; k <frames.size(); k+=6)
+//        TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, frames.size());
 
-    TextureS texture;
-    texture.id = TextureFromFile(st, this->directory);
-    texture.type = "texture_diffuse";
-    textures.push_back(texture);
+//    TextureS texture;
+//    texture.id = TextureFromFile(st, this->directory);
+//    texture.type = "texture_diffuse";
+//    textures.push_back(texture);
 
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
@@ -256,4 +276,44 @@ unsigned int Model::TextureFromFile2(const char *path, const std::string &direct
     }
 
     return textureID;
+}
+
+void Model::TextureFromFile3(const char *path, const std::string &directory, GLuint arrayTexture, int frameNumber)
+{
+    glewInit();
+    std::string filename = std::string(path);
+    filename = directory + '/' + filename;
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, arrayTexture);
+
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+            1,                      //Mipmap number
+            0, 0, frameNumber, //xoffset, yoffset, zoffset
+            width, height, 1,          //width, height, depth
+            GL_RGB,                 //format
+            GL_UNSIGNED_BYTE,       //type
+            data); //pointer to data
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
 }

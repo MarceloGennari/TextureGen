@@ -12,27 +12,27 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 void Mesh::Draw(Shader shader){
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
-    for(unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
-        // retrieve texture number (the N in diffuse_textureN)
-        std::stringstream ss;
-        std::string number;
-        std::string name = textures[i].type;
-        if(name == "texture_diffuse")
-            ss << diffuseNr++; // transfer unsigned int to stream
-        else if(name == "texture_specular")
-            ss << specularNr++; // transfer unsigned int to stream
-        number = ss.str();
+//    for(unsigned int i = 0; i < textures.size(); i++)
+//    {
+//        glActiveTexture(GL_TEXTURE0 + i); // activate proper texture unit before binding
+//        // retrieve texture number (the N in diffuse_textureN)
+//        std::stringstream ss;
+//        std::string number;
+//        std::string name = textures[i].type;
+//        if(name == "texture_diffuse")
+//            ss << diffuseNr++; // transfer unsigned int to stream
+//        else if(name == "texture_specular")
+//            ss << specularNr++; // transfer unsigned int to stream
+//        number = ss.str();
 
-        shader.setFloat(("material." + name + number).c_str(), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-    }
+//        shader.setFloat(("material." + name + number).c_str(), i);
+//        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+//    }
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, textures[0].id);
 
-    shader.setInt("texture1", 0);
-    shader.setInt("texture2", 1);
-    shader.setInt("texture3", 2);
     shader.use();
+
     if (textures.size()==0)
         shader.setBool("isTex", 0);
     else
