@@ -85,11 +85,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.TexCoords2 = vec;
         }
         else{
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
-            vertex.TexCoords2 = glm::vec2(0.0f, 0.0f);
         }
 
         vertices.push_back(vertex);
@@ -113,7 +111,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
 
 //    int frameInd = 9;
-//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd]);
+//    TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[frameInd], 9 ,1);
 //    std::string nr = SSTR(frames[frameInd]->frameNr);
 //    TextureS texture;
 //    aiString str("Frames/0"+nr+".ppm");
@@ -156,6 +154,11 @@ unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::strin
 {
     glewInit();
 
+    /* This doesn't work because of blending problems.
+     * When blending in a same texture, the OpenGL framework will create a "shading" from the position to the destination.
+     * In this case, it will be a "jump" and it will make the transition look awful
+     * */
+
     int width, height, nrComponents;
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -192,12 +195,15 @@ unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::strin
         GLenum format = GL_RGB;
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height*NrFrames, 0, format, GL_UNSIGNED_BYTE, result);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 7);
+
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         stbi_image_free(data);
     }
@@ -233,7 +239,7 @@ unsigned int Model::TextureFromFile2(const char *path, const std::string &direct
             format = GL_RGBA;
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height*2, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

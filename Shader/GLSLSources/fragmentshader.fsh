@@ -32,8 +32,9 @@ void main()
     vec3 diffuse = diff*lightColour;
 
     vec3 result = (ambient+diffuse)*objectColour;
+    result = vec3(1.0f, 1.0f, 1.0f);
 
-    if(isTex==1){
+    if(isTex==1 && (atexCoord.x !=0.0f && atexCoord.y != 0.0f)){
             vec4 color = mix(texture(texture2, atexCoord2),texture(texture1, atexCoord), 0.3f);
             FragColor = mix(color, texture(texture3, atexCoord3), 0.5f);
             FragColor = texture(texture1, atexCoord);
