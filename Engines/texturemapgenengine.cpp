@@ -15,6 +15,10 @@ bool sortP(glm::vec2 a, glm::vec2 b){
     return a.x<b.x;
 }
 
+bool testFace(Vertex *v1, Vertex *v2, Vertex *v3){
+    return(v1->TexCoords.x>0 && (v2->TexCoords.x==0 || v3->TexCoords.x == 0));
+}
+
 void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, Frame *frame, int frNr, int totalFr){
 
         // This is the list of vertices per pixel
@@ -28,13 +32,17 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
     std::string nr = SSTR(frame->frameNr-1);
     Camera::getCam()->positionCameraFrN(nr);
 
-    std::vector<std::vector<float> > depthPixels = zBuffering(vs, ind, verticesInPixel, frame);
+    // This is going to hold all of the faces that are inside this frame
+    std::vector<int> faces;
+
+    std::vector<std::vector<float> > depthPixels = zBuffering(vs, ind, verticesInPixel, frame, faces);
 
     // Now that we have all of the depths and all of the pixels, we can eliminate those vertices that are behind the pixel
     for(int w = 0; w<frame->frame->getWidth(); w++){
         for(int h = 0; h<frame->frame->getHeight(); h++){
             for(int v = 0; v<verticesInPixel[w][h].size(); v++){
                 if(!(verticesInPixel[w][h][v]->assigned)){
+                    // This is the case where the vertex has never been assigned a value before
                     if(verticesInPixel[w][h][v]->zDepth>1.05*depthPixels[w][h]){
                         verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
                     } else {
@@ -45,14 +53,74 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
             }
         }
     }
+
+    // Now there are some faces which have just one or two of the vertices assigned, which is not what we want
+    // The next bit takes all of the faces that have less than three vertices assigned and:
+    // Create a new vertex for each of the vertices assigned to that face with the same position of the initial vertex
+
+    for(int k = 0; k<faces.size(); k++){
+        unsigned int face = faces[k];
+        unsigned int index1 = face*3;
+        unsigned int index2 = face*3+1;
+        unsigned int index3 = face*3+2;
+        Vertex *v1 = &vs[ind[index1]];
+        Vertex *v2 = &vs[ind[index2]];
+        Vertex *v3 = &vs[ind[index3]];
+
+        // Here we test whether all of the vertices has a value assigned for the texture coordinate
+        /* The cases are:
+         * v1, v2 and v3 are assigned
+         * v1 is assigned but v2 and v3 are not
+         * v2 is assigned but v1 and v3 are not
+         * v3 is assigned but v1 and v2 are not
+         * v1 and v2 are assigned but v3 is not
+         * v2 and v3 are assigned but v1 is not
+         * v1 and v3 are assigned but v2 is not
+         * */
+
+        if((v1->TexCoords.x>0 && v2->TexCoords.x>0 && v3->TexCoords.x>0) || (!(v1->assigned)&&!(v2->assigned)&&!(v3->assigned)))
+            continue;
+
+        // Case 1
+        if(testFace(v1,v2,v3)){
+            Vertex newV = *v1;
+            newV.TexCoords = glm::vec2(0,0);
+            newV.TexCoords2 = glm::vec2(0,0);
+            newV.assigned = false;
+            vs.push_back(newV);
+            ind[index1] = vs.size()-1;
+        }
+
+        // Case 2
+        if(testFace(v2,v1,v3)){
+            Vertex newV = *v2;
+            newV.TexCoords = glm::vec2(0,0);
+            newV.TexCoords2 = glm::vec2(0,0);
+            newV.assigned = false;
+            vs.push_back(newV);
+            ind[index2] = vs.size()-1;
+        }
+
+        // Case 3
+        if(testFace(v3,v1,v2)){
+            Vertex newV = *v3;
+            newV.TexCoords = glm::vec2(0,0);
+            newV.TexCoords2 = glm::vec2(0,0);
+            newV.assigned = false;
+            vs.push_back(newV);
+            ind[index3] = vs.size()-1;
+        }
+    }
 }
+
+
 
 glm::vec2 TextureEngine::TextureMapGenEngine::project(glm::vec3 &vs){
     return glm::vec2(((vs.x*Camera::getCam()->getFocal().x)/vs.z)+Camera::getCam()->getPrinc().x,
                      ((vs.y*Camera::getCam()->getFocal().y)/vs.z)+Camera::getCam()->getPrinc().y);
 }
 
-std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<std::vector<std::vector<Vertex *> > > &verticesInPixel, Frame* frame){
+std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<std::vector<std::vector<Vertex *> > > &verticesInPixel, Frame* frame, std::vector<int> &faces){
 
     // This will hopefully solve the zBuffering problem from the texture generation
     /* The idea of the algorithm is:
@@ -69,7 +137,6 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
     // This will contain a pointer to all of the vertices that fall within the contraint above
     std::vector<unsigned int> verticesInsideImage;
-    std::vector<int> faces;
 
     // Projecting the Vertices to the RGB coordinate
     for(int k =0; k<vs.size(); k++){
@@ -101,6 +168,7 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
             if(vs[k].TexCoords.x>0) // This accounts for the case where a coordinate has already been assigned to that vertex
                 continue;
+
             vs[k].TexCoords.x = position.x;
             vs[k].TexCoords.y = position.y;
 

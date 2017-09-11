@@ -23,6 +23,10 @@ namespace ImageProcessing{
     unsigned char * absHorDiff(Image &im);
     float calcBlur(Image &im);
 }
+struct Face{
+    int FaceNr; // This is going to hold the face Number (which will be correspondent to the position of the face in the ind variable
+    int FrAssigned; // This is going to hold the number of the frame that this face is assigned to in case all of its vertices has a texture coordinate
+};
 
 struct Vertex{
     glm::vec3 Pos; // Position of the vector in 3D

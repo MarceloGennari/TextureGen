@@ -99,13 +99,22 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     }
 
     /* WHOLE ALGORITHM */
-
     TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
+
+    // This is going to hold a list of all of the faces in the model
+    std::vector<int> faces;
+
+    for(int k = 0; k<vertices.size(); k++){
+        // Remember that each vertex has a vector of faces that it belongs to
+        faces.insert(faces.end(), vertices[k].faces.begin(), vertices[k].faces.end());
+    }
+    std::sort(faces.begin(), faces.end());
+    faces.erase(std::unique(faces.begin(), faces.end()), faces.end());
 
     /* This part loads the Textures from the sample keys
      * */
     // Getting the Key Frames
-    std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,10,504);
+    std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,30,504);
     std::vector<aiString> str;
     for(int k = 0; k<frames.size(); k++){
         TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, frames.size());
