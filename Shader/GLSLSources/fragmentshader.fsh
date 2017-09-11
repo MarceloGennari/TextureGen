@@ -6,8 +6,7 @@ in vec2 atexCoord;
 in vec3 Normal;
 in vec3 fragPos;
 
-precision highp sampler2DArray;
-uniform sampler2DArray textureArray;
+uniform sampler2D arrayTexture;
 
 uniform int isTex;
 
@@ -31,8 +30,8 @@ void main()
     vec3 result = (ambient+diffuse)*objectColour;
     result = vec3(1.0f, 1.0f, 1.0f);
 
-    if(isTex==1 && (atexCoord.x !=0.0f && atexCoord.y != 0.0f)){
-            FragColor = texture(textureArray, vec3(atexCoord, 10.0f));
+    if(isTex==1 && (atexCoord.x !=0.0f && atexCoord.y != 0.0f && atexCoord.x<1.0f && atexCoord.y<1.0f)){
+            FragColor = texture(arrayTexture, vec2(atexCoord));
     } else {
         FragColor = vec4(result, 1);
     }

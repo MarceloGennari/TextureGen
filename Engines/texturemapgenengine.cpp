@@ -38,7 +38,7 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
                     if(verticesInPixel[w][h][v]->zDepth>1.05*depthPixels[w][h]){
                         verticesInPixel[w][h][v]->TexCoords = glm::vec2(0,0);
                     } else {
-                        verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, (verticesInPixel[w][h][v]->TexCoords.y/(480*totalFr))+((float)frNr/(float)totalFr));
+                        verticesInPixel[w][h][v]->TexCoords = glm::vec2(verticesInPixel[w][h][v]->TexCoords.x/640, verticesInPixel[w][h][v]->TexCoords.y/(480*totalFr)+((float)frNr/(float)totalFr));
                         verticesInPixel[w][h][v]->assigned = true;
                     }
                 }
@@ -85,25 +85,32 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
         // This is also limiting distance just in case things get strected because of the distance + the further the point the less accurate the projection will be
         if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 2.0f){
-            if(vs[k].TexCoords.x>0) // This accounts for the case where a coordinate has already been assigned to that vertex
-                continue;
 
             position.x = 641-position.x;
             pixel.x = 641-pixel.x;
+
 
             verticesInsideImage.push_back(k);
 
             vs[k].zDepth = std::abs(posCamCoord.z);
             depthPixels[pixel.x-1][pixel.y-1] = std::abs(posCamCoord.z);
             verticesInPixel[pixel.x-1][pixel.y-1].push_back(&vs[k]);
+
+            vs[k].TexCoords2.x = position.x;
+            vs[k].TexCoords2.y = position.y;
+
+            if(vs[k].TexCoords.x>0) // This accounts for the case where a coordinate has already been assigned to that vertex
+                continue;
             vs[k].TexCoords.x = position.x;
             vs[k].TexCoords.y = position.y;
+
         }
     }
 
     /* Now that we have all of the vertices that makes up the image, we will need to get all of the faces.
      * */
     for(int k = 0; k<verticesInsideImage.size(); k++){
+        // Remember that each vertex has a vector of faces that it belongs to
         faces.insert(faces.end(), vs[verticesInsideImage[k]].faces.begin(), vs[verticesInsideImage[k]].faces.end());
     }
 
@@ -122,9 +129,9 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
         // https://stackoverflow.com/questions/8957028/getting-a-list-of-locations-within-a-triangle-in-the-form-of-x-y-positions
         std::vector<glm::vec2> pixelsInTriangle;
         std::vector<glm::vec2> Face;
-        Face.push_back(vs[ind[faces[f]*3]].TexCoords);
-        Face.push_back(vs[ind[faces[f]*3+1]].TexCoords);
-        Face.push_back(vs[ind[faces[f]*3+2]].TexCoords);
+        Face.push_back(vs[ind[faces[f]*3]].TexCoords2);
+        Face.push_back(vs[ind[faces[f]*3+1]].TexCoords2);
+        Face.push_back(vs[ind[faces[f]*3+2]].TexCoords2);
 
         std::sort(Face.begin(), Face.end(), sortP);
 
@@ -188,7 +195,6 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
                 pixelsInTriangle.push_back(glm::vec2(k, r));
             }
         }
-
 
         for(int h =0; h<pixelsInTriangle.size(); h++){
             float *currentDepth = &depthPixels[pixelsInTriangle[h].x-1][pixelsInTriangle[h].y-1];
