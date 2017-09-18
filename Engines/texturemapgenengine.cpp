@@ -146,9 +146,9 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
         // Those two are hacks because the camera pose is not right or I don't know exactly how to use the poses
         pixel.y = pixel.y +5;
-        pixel.x = pixel.x -70;
+        pixel.x = pixel.x -65;
         position.y = position.y +5;
-        position.x = position.x -70;
+        position.x = position.x -65;
 
         // This is also limiting distance just in case things get strected because of the distance + the further the point the less accurate the projection will be
         if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 2.0f){
@@ -171,7 +171,6 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
             vs[k].TexCoords.x = position.x;
             vs[k].TexCoords.y = position.y;
-
         }
     }
 

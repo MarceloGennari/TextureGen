@@ -52,7 +52,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<TextureS> textures;
+    std::vector<Texture> textures;
 
     // Walk through each of the mesh's vertices
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -134,7 +134,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         str.push_back(st);
     }
 
-    TextureS texture;
+    Texture texture;
     int textureId = TextureFromFile(str, this->directory);
     texture.id = textureId;
     texture.type = "texture_diffuse";
@@ -196,57 +196,13 @@ unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::strin
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
         glGenerateMipmap(GL_TEXTURE_2D);
-
 
         stbi_image_free(result);
     }
     else
     {
         std::cout << "Texture failed to load" << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
-}
-
-unsigned int Model::TextureFromFile2(const char *path, const std::string &directory)
-{
-    glewInit();
-    std::string filename = std::string(path);
-    filename = directory + '/' + filename;
-
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
 

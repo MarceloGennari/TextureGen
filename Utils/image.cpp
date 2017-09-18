@@ -129,8 +129,7 @@ void Image::Display(){
     glewInit();
     std::string vs = "/home/marcelo/TextureGen/Utils/GLSL/imvertsh.vsh";
     std::string fs = "/home/marcelo/TextureGen/Utils/GLSL/imfragsh.fsh";
-    std::string geom = "/home/marcelo/TextureGen/Shader/GLSLSources/geometryshader.vert";
-    Shader ourShader(vs.c_str(), geom.c_str(), fs.c_str());
+    Shader ourShader(vs.c_str(), fs.c_str());
 
     float vertices[] = {
             // positions          // colors           // texture coords
@@ -218,8 +217,7 @@ void Image::displayGray(){
     glewInit();
     std::string vs = "/home/marcelo/TextureGen/Utils/GLSL/imvertsh.vsh";
     std::string fs = "/home/marcelo/TextureGen/Utils/GLSL/imfragsh.fsh";
-    std::string geom = "/home/marcelo/TextureGen/Shader/GLSLSources/geometryshader.vert";
-    Shader ourShader(vs.c_str(), geom.c_str(), fs.c_str());
+    Shader ourShader(vs.c_str(), fs.c_str());
 
     float vertices[] = {
             // positions          // colors           // texture coords
@@ -341,28 +339,3 @@ void Image::getPixel(int x, int y, unsigned char &gr){
     index = index + (x-1);
     gr = gray[index];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

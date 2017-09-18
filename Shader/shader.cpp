@@ -5,37 +5,33 @@
 #include "GL/glew.h"
 #include <glm/gtc/type_ptr.hpp>
 
-Shader::Shader(const char* vertexPath, const char *geometryPath, const char* fragmentPath)
+Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     // 1. retrieve the vertex/fragment source code from filePath
        std::string vertexCode;
-       std::string geometryCode;
        std::string fragmentCode;
        std::ifstream vShaderFile;
-       //std::ifstream gShaderFile;
+
        std::ifstream fShaderFile;
        // ensure ifstream objects can throw exceptions:
        vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-       //gShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
        fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+
        try
        {
            // open files
            vShaderFile.open(vertexPath);
            //gShaderFile.open(geometryPath);
            fShaderFile.open(fragmentPath);
-           std::stringstream vShaderStream, gShaderStream, fShaderStream;
+           std::stringstream vShaderStream, fShaderStream;
            // read file's buffer contents into streams
            vShaderStream << vShaderFile.rdbuf();
-           //gShaderStream << gShaderFile.rdbuf();
            fShaderStream << fShaderFile.rdbuf();
            // close file handlers
            vShaderFile.close();
-           //gShaderFile.close();
            fShaderFile.close();
            // convert stream into string
            vertexCode   = vShaderStream.str();
-           //geometryCode = gShaderStream.str();
            fragmentCode = fShaderStream.str();
        }
        catch(std::ifstream::failure e)
@@ -44,7 +40,6 @@ Shader::Shader(const char* vertexPath, const char *geometryPath, const char* fra
             std::cout<< e.what() << std::endl;
        }
        const char* vShaderCode = vertexCode.c_str();
-       //const char* gShaderCode = geometryCode.c_str();
        const char* fShaderCode = fragmentCode.c_str();
 
        // 2. compile shaders
@@ -63,17 +58,6 @@ Shader::Shader(const char* vertexPath, const char *geometryPath, const char* fra
            glGetShaderInfoLog(vertex, 2048, NULL, infoLog);
            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
        };
-
-       // similar for geometry shader
-       //geometry = glCreateShader(GL_GEOMETRY_SHADER);
-       //glShaderSource(geometry, 1, &gShaderCode, NULL);
-       //glCompileShader(geometry);
-       // print compile errors if any
-       //glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-       //if(!success){
-       //    glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-       //    std::cout<<"ERROR::SAHDER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
-       //};
 
        // similiar for Fragment Shader
        fragment = glCreateShader(GL_FRAGMENT_SHADER);

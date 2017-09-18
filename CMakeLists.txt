@@ -29,7 +29,6 @@ INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR})
 
 add_subdirectory(Shader)
 add_subdirectory(Camera)
-add_subdirectory(Texture)
 add_subdirectory(Mesh)
 add_subdirectory(Light)
 add_subdirectory(Engines)
@@ -42,7 +41,6 @@ file(GLOB poses_teddy "Teddy/Poses/*.txt")
 file(GLOB frames_teddy_pgm "Teddy/Frames/*.pgm")
 include_directories(Shader)
 include_directories(Camera)
-include_directories(Texture)
 include_directories(Mesh)
 include_directories(Light)
 include_directories(Engines)
@@ -56,7 +54,6 @@ include_directories(Utils)
 # This is how to include a .SO library
 # When installing in other PC, keep that in mind and change accordingly
 #########################
-
 
 include_directories(/home/marcelo/Downloads/assimp-4.0.1/include)
 include_directories(/home/marcelo/Downloads/assimp-4.0.1/build/include)

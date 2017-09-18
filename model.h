@@ -24,27 +24,19 @@ public:
      void Draw(Shader shader);
      void loadModel(std::string path);
      std::vector<Mesh> * getMeshes(){return &meshes;}
+
  private:
      static Model* m;
 
      /*  Model Data  */
      std::vector<Mesh> meshes;
      std::string directory;
-     std::vector<TextureS> textures_loaded;
+     std::vector<Texture> textures_loaded;
 
      /*  Functions   */
      void processNode(aiNode *node, const aiScene *scene);
      Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-
      unsigned int TextureFromFile(std::vector<aiString> path, const std::string &directory);
-     unsigned int TextureFromFile2(const char *path, const std::string &directory);
-
-     std::vector<std::pair<unsigned int, unsigned int> > PairSelection(std::vector<unsigned int> &ind);
-     void unRepVert(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
-     std::vector<glm::mat4> calcQMatrices(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
-     void Optimization(std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
-     std::vector<Pair> formPairList(std::vector<Vertex> &vs, std::vector<std::pair<unsigned int, unsigned int> > &pairs, std::vector<glm::mat4> &Q);
-     void changeVert(std::vector<Pair> &Pairs, std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<glm::mat4> &listQ);
 };
 
 #endif // MODEL_H

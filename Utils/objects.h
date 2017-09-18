@@ -10,8 +10,6 @@
 #include <assimp/postprocess.h>
 #include "image.h"
 
-
-
 namespace ImageProcessing{
 
     namespace ImageFilters{
@@ -63,7 +61,7 @@ struct VertSort
     }
 };
 
-struct TextureS{
+struct Texture{
     unsigned int id;
     std::string type;
     aiString path;

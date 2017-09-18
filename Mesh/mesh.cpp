@@ -1,11 +1,10 @@
 #include "mesh.h"
-#include <iostream>
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureS> textures)
+
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
-
     this->setUpMesh();
 }
 
@@ -28,8 +27,6 @@ void Mesh::Draw(Shader shader){
         shader.setFloat(("material." + name + number).c_str(), i);
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
-
-
 
     shader.use();
 
@@ -58,7 +55,7 @@ void Mesh::setUpMesh(){
        glBindVertexArray(VAO);
        glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+       glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
@@ -74,44 +71,5 @@ void Mesh::setUpMesh(){
        glEnableVertexAttribArray(2);
        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
-       // vertex texture coords
-       glEnableVertexAttribArray(3);
-       glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords2));
-
        glBindVertexArray(0);
-}
-
-Mesh::Mesh(float *points, int size1,  bool Texture, float *indices, int size2){
-    int size = 3;
-    if(Texture){
-       size = size+2;
-    }
-
-    int nrPoints = size1;
-
-    int index = 0;
-    Vertex v;
-    TextureS t;
-    for(int i = 0; i< nrPoints; i++){
-
-        index = i*size1;
-
-        v.Pos = glm::vec3(points[index++], points[index++], points[index++]);
-
-        if(Texture){
-           v.TexCoords = glm::vec2(points[index++], points[index++]);
-        }
-        this->vertices.push_back(v);
-
-    }
-
-    int nrIndices = size2;
-
-    index = 0;
-    for(int i = 0; i<size2; i++){
-        this->indices.push_back(indices[index++]);
-        this->indices.push_back(indices[index++]);
-    }
-
-
 }
