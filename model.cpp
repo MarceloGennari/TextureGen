@@ -115,27 +115,13 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
      * */
     // Getting the Key Frames
     std::vector<Frame *> frames = TextureEngine::SaptiotemporalEngine::temporalSampling(30,50,504);
-    std::vector<aiString> str;
+
     for(int k = 0; k<frames.size(); k++){
         TextureEngine::TextureMapGenEngine::getTextureCoords(vertices, indices, frames[k], k, frames.size());
-        std::string nr = SSTR(frames[k]->frameNr);
-
-        std::string s;
-
-        if(frames[k]->frameNr<10)
-            s = "Frames/000"+SSTR(nr)+".ppm";
-        else if(frames[k]->frameNr<100)
-            s = "Frames/00"+SSTR(nr)+".ppm";
-        else if(frames[k]->frameNr<1000)
-            s = "Frames/0"+SSTR(nr)+".ppm";
-        else if(frames[k]->frameNr<10000)
-            s = "Frames/"+SSTR(nr)+".ppm";
-        aiString st(s);
-        str.push_back(st);
     }
 
     Texture texture;
-    int textureId = TextureFromFile(str, this->directory);
+    int textureId = TextureFromFile(frames);
     texture.id = textureId;
     texture.type = "texture_diffuse";
     textures.push_back(texture);
@@ -144,25 +130,17 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     return Mesh(vertices, indices, textures);
 }
 
-unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::string &directory)
+unsigned int Model::TextureFromFile(std::vector<Frame *> frames)
 {
     glewInit();
 
-    /* This doesn't work because of blending problems.
-     * When blending in a same texture, the OpenGL framework will create a "shading" from the position to the destination.
-     * In this case, it will be a "jump" and it will make the transition look awful
-     * */
-
-    int width, height, nrComponents;
+    int width = frames[0]->frame->getWidth(); int height = frames[0]->frame->getHeight(); int nrComponents =3;
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int NrFrames = path.size();
+    int NrFrames = frames.size();
 
-    std::string filename = std::string(path[0].C_Str());
-    filename = directory + '/' + filename;
-
-    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    unsigned char* data = frames[0]->frame->getRGB();
     int sizeData = width*height*nrComponents;
 
     unsigned char* result = new unsigned char[width*height*nrComponents*NrFrames];
@@ -171,24 +149,24 @@ unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::strin
     std::copy(data, data+sizeData, result);
     sizeResult = sizeResult + sizeData;
 
+    free(data);
+
     for(int k = 1; k<NrFrames; k++){
-        filename = std::string(path[k].C_Str());
-        filename = directory + '/' + filename;
 
         int sizeData2 = width*height*nrComponents;
         unsigned char *data2 = new unsigned char[sizeData2];
-        data2 = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+        data2 = frames[k]->frame->getRGB();
 
         std::copy(data2, data2+sizeData2, result+sizeResult);
         sizeResult = sizeResult+sizeData2;
+        free(data2);
     }
 
 
     if (result)
     {
-        GLenum format = GL_RGB;
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height*NrFrames, 0, format, GL_UNSIGNED_BYTE, result);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height*NrFrames, 0, GL_RGB, GL_UNSIGNED_BYTE, result);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -198,12 +176,11 @@ unsigned int Model::TextureFromFile(std::vector<aiString> path, const std::strin
 
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        stbi_image_free(result);
+        free(result);
     }
     else
     {
         std::cout << "Texture failed to load" << std::endl;
-        stbi_image_free(data);
     }
 
     return textureID;

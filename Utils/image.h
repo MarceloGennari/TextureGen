@@ -23,6 +23,7 @@ class Image{
         void getPixel(int x, int y, unsigned char &gr);
         int getWidth(){return width;}
         int getHeight(){return height;}
+        unsigned char *getRGB(){return rgb;}
 
 
     private:

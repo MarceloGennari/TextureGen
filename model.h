@@ -6,7 +6,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "stb_image.h"
 #include "textureengine.h"
 #include "objects.h"
 
@@ -36,7 +35,7 @@ public:
      /*  Functions   */
      void processNode(aiNode *node, const aiScene *scene);
      Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-     unsigned int TextureFromFile(std::vector<aiString> path, const std::string &directory);
+     unsigned int TextureFromFile(std::vector<Frame *> frames);
 };
 
 #endif // MODEL_H
