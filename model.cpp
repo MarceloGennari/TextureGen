@@ -1,5 +1,6 @@
 #include "model.h"
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <iterator>
 #include <glm/glm.hpp>
@@ -31,6 +32,7 @@ void Model::loadModel(std::string path){
 
     processNode(scene->mRootNode, scene);
 }
+
 
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
@@ -99,7 +101,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     }
 
     /* WHOLE ALGORITHM */
-    TextureEngine::SurfaceSimplificationEngine::Optimize2(vertices, indices);
+    TextureEngine::SurfaceSimplificationEngine::unRepVert(vertices, indices);
 
     // This is going to hold a list of all of the faces in the model
     std::vector<int> faces;

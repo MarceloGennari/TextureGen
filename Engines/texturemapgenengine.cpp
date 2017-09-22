@@ -41,6 +41,7 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
     for(int w = 0; w<frame->frame->getWidth(); w++){
         for(int h = 0; h<frame->frame->getHeight(); h++){
             for(int v = 0; v<verticesInPixel[w][h].size(); v++){
+
                 if(!(verticesInPixel[w][h][v]->assigned)){
                     // This is the case where the vertex has never been assigned a value before
                     if(verticesInPixel[w][h][v]->zDepth>1.05*depthPixels[w][h]){
@@ -113,8 +114,6 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
     }
 }
 
-
-
 glm::vec2 TextureEngine::TextureMapGenEngine::project(glm::vec3 &vs){
     return glm::vec2(((vs.x*Camera::getCam()->getFocal().x)/vs.z)+Camera::getCam()->getPrinc().x,
                      ((vs.y*Camera::getCam()->getFocal().y)/vs.z)+Camera::getCam()->getPrinc().y);
@@ -151,11 +150,10 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
         position.x = position.x -65;
 
         // This is also limiting distance just in case things get strected because of the distance + the further the point the less accurate the projection will be
-        if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 2.0f){
+        if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 1.5f){
 
             position.x = 641-position.x;
             pixel.x = 641-pixel.x;
-
 
             verticesInsideImage.push_back(k);
 
