@@ -32,6 +32,7 @@ add_subdirectory(Camera)
 add_subdirectory(Mesh)
 add_subdirectory(Light)
 add_subdirectory(Engines)
+add_subdirectory(Engines/CUDA)
 add_subdirectory(Utils)
 add_subdirectory(Teddy)
 add_subdirectory(Teddy/Frames)
@@ -44,7 +45,9 @@ include_directories(Camera)
 include_directories(Mesh)
 include_directories(Light)
 include_directories(Engines)
+include_directories(Engines/CUDA)
 include_directories(Utils)
+
 #######################
 # INCLUDE_DIRECTORIES(your/header/dir)
 # LINK_DIRECTORIES(your/library/dir)
@@ -60,7 +63,28 @@ include_directories(/home/marcelo/Downloads/assimp-4.0.1/build/include)
 LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.1/build/code)
 
 set(SOURCE ${SOURCE} model.cpp model.h)
-add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy} ${poses_teddy} ${frames_teddy_pgm})
+
+###
+# Tests for including CUDA
+###
+find_package(CUDA 6.5)
+if(CUDA_FOUND)
+    INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
+    LINK_DIRECTORIES(${CUDA_LIBRARY_DIRS})
+endif(CUDA_FOUND)
+
+###
+# If CUDA is not found, then the variable "CUDA_NOT_FOUND" is defined in the preprocessor
+# Using the variable, the system will work solely on CPU code
+###
+
+if(CUDA_FOUND)
+    cuda_add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy} ${poses_teddy} ${frames_teddy_pgm})
+else(CUDA_FOUND)
+    add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy} ${poses_teddy} ${frames_teddy_pgm})
+    add_definitions(-DCUDA_NOT_FOUND)
+endif(CUDA_FOUND)
+
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENGL_LIBRARY})
 

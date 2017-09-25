@@ -121,7 +121,6 @@ glm::vec2 TextureEngine::TextureMapGenEngine::project(glm::vec3 &vs){
 
 std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(std::vector<Vertex> &vs, std::vector<unsigned int> &ind, std::vector<std::vector<std::vector<Vertex *> > > &verticesInPixel, Frame* frame, std::vector<int> &faces){
 
-    // This will hopefully solve the zBuffering problem from the texture generation
     /* The idea of the algorithm is:
      * Given the pose of the camera, the map and the projected points:
      * We calculate the z-Buffer value for each pixel and we give a list of vertices in each pixel
