@@ -8,6 +8,12 @@
 #include <algorithm>
 #include <iterator>
 
+#ifndef CUDA_NOT_FOUND
+    #include <CUDA/CUDAFunctions.h>
+    #include <cuda_runtime_api.h>
+    #include <cuda.h>
+#endif
+
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -37,6 +43,31 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
 
     std::vector<std::vector<float> > depthPixels = zBuffering(vs, ind, verticesInPixel, frame, faces);
 
+
+#ifndef CUDA_NOT_FOUND
+    std::vector<std::vector<std::vector<Vertex *> > > * dev_verticesInPixel;
+    std::vector<std::vector<float> > *dev_depthPixels;
+    int *dev_fr; int *dev_frNr;
+
+    cudaMalloc((void**) &dev_depthPixels, frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float));
+    // Chose 20 vertices per pixels as a placeholder for now. I'm going to change that to something more accurate in the future
+    short nVperP = 20;
+    cudaMalloc((void**) &dev_verticesInPixel, frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *));
+    cudaMalloc((void**) &dev_fr, sizeof(int),);
+    cudaMalloc((void**) &dev_frNr, sizeof(int));
+
+    // Notice that depthPixels cannot be sent to Cuda directly because it is a std::vector
+    // By using &depthPixels[0] we are sending the Contiguous array instead of the std::vector object
+    // The same is valid for verticesInPixel
+    cudaMemcpy(dev_depthPixels, &depthPixels[0], frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_verticesInPixel, &verticesInPixel[0], frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_fr, &frNr, sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_frNr, &totalFr, sizeof(int), cudaMemcpyHostToDevice);
+    findTexCoord(dev_depthPixels, dev_verticesInPixel, dev_fr, dev_frNr);
+
+    cudaFree(dev_depthPixels);
+    cudaFree(dev_verticesInPixel);
+#endif
     // Now that we have all of the depths and all of the pixels, we can eliminate those vertices that are behind the pixel
     for(int w = 0; w<frame->frame->getWidth(); w++){
         for(int h = 0; h<frame->frame->getHeight(); h++){

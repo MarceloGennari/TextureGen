@@ -1,0 +1,5 @@
+set(SOURCE ${SOURCE}
+         ${CMAKE_CURRENT_SOURCE_DIR}/CUDAFunctions.cu
+         ${CMAKE_CURRENT_SOURCE_DIR}/CUDAFunctions.h
+	PARENT_SCOPE
+    )

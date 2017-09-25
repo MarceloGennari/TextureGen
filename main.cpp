@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 
     #ifndef CUDA_NOT_FOUND
-        std::cout<< "CUDA FOUND" << std::endl;
+        std::cout<< "CUDA: FOUND" << std::endl;
     #endif
 
     Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy/mesh.stl");
