@@ -45,28 +45,28 @@ void TextureEngine::TextureMapGenEngine::getTextureCoords(std::vector<Vertex> &v
 
 
 #ifndef CUDA_NOT_FOUND
-    std::vector<std::vector<std::vector<Vertex *> > > * dev_verticesInPixel;
-    std::vector<std::vector<float> > *dev_depthPixels;
-    int *dev_fr; int *dev_frNr;
+//    std::vector<std::vector<std::vector<Vertex *> > > * dev_verticesInPixel;
+//    std::vector<std::vector<float> > *dev_depthPixels;
+//    int *dev_fr; int *dev_frNr;
 
-    cudaMalloc((void**) &dev_depthPixels, frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float));
-    // Chose 20 vertices per pixels as a placeholder for now. I'm going to change that to something more accurate in the future
-    short nVperP = 20;
-    cudaMalloc((void**) &dev_verticesInPixel, frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *));
-    cudaMalloc((void**) &dev_fr, sizeof(int),);
-    cudaMalloc((void**) &dev_frNr, sizeof(int));
+//    cudaMalloc((void**) &dev_depthPixels, frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float));
+//    // Chose 20 vertices per pixels as a placeholder for now. I'm going to change that to something more accurate in the future
+//    short nVperP = 20;
+//    cudaMalloc((void**) &dev_verticesInPixel, frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *));
+//    cudaMalloc((void**) &dev_fr, sizeof(int),);
+//    cudaMalloc((void**) &dev_frNr, sizeof(int));
 
-    // Notice that depthPixels cannot be sent to Cuda directly because it is a std::vector
-    // By using &depthPixels[0] we are sending the Contiguous array instead of the std::vector object
-    // The same is valid for verticesInPixel
-    cudaMemcpy(dev_depthPixels, &depthPixels[0], frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(dev_verticesInPixel, &verticesInPixel[0], frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *), cudaMemcpyHostToDevice);
-    cudaMemcpy(dev_fr, &frNr, sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(dev_frNr, &totalFr, sizeof(int), cudaMemcpyHostToDevice);
-    findTexCoord(dev_depthPixels, dev_verticesInPixel, dev_fr, dev_frNr);
+//    // Notice that depthPixels cannot be sent to Cuda directly because it is a std::vector
+//    // By using &depthPixels[0] we are sending the Contiguous array instead of the std::vector object
+//    // The same is valid for verticesInPixel
+//    cudaMemcpy(dev_depthPixels, &depthPixels[0], frame->frame->getHeight()*frame->frame->getWidth()*sizeof(float), cudaMemcpyHostToDevice);
+//    cudaMemcpy(dev_verticesInPixel, &verticesInPixel[0], frame->frame->getHeight()*frame->frame->getWidth()*nVperP*sizeof(Vertex *), cudaMemcpyHostToDevice);
+//    cudaMemcpy(dev_fr, &frNr, sizeof(int), cudaMemcpyHostToDevice);
+//    cudaMemcpy(dev_frNr, &totalFr, sizeof(int), cudaMemcpyHostToDevice);
+//    findTexCoord(dev_depthPixels, dev_verticesInPixel, dev_fr, dev_frNr);
 
-    cudaFree(dev_depthPixels);
-    cudaFree(dev_verticesInPixel);
+//    cudaFree(dev_depthPixels);
+//    cudaFree(dev_verticesInPixel);
 #endif
     // Now that we have all of the depths and all of the pixels, we can eliminate those vertices that are behind the pixel
     for(int w = 0; w<frame->frame->getWidth(); w++){
@@ -175,9 +175,9 @@ std::vector<std::vector<float> > TextureEngine::TextureMapGenEngine::zBuffering(
 
         // Those two are hacks because the camera pose is not right or I don't know exactly how to use the poses
         pixel.y = pixel.y +5;
-        pixel.x = pixel.x -65;
+        pixel.x = pixel.x -64;
         position.y = position.y +5;
-        position.x = position.x -65;
+        position.x = position.x -64;
 
         // This is also limiting distance just in case things get strected because of the distance + the further the point the less accurate the projection will be
         if(pixel.x<=640&&pixel.x>0&&pixel.y<=480&&pixel.y>0 && std::abs(posCamCoord.z) < 1.5f){
