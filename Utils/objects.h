@@ -5,9 +5,6 @@
 #include "glm/common.hpp"
 #include <string>
 #include "glm/matrix.hpp"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include "image.h"
 
 namespace ImageProcessing{
@@ -34,6 +31,8 @@ struct Vertex{
     std::vector<int> faces; // This is a list of all of the faces that this vertex is part of
     float zDepth; // This is the zDepth of when this vertex is projected used in TextureGenEngine
     bool assigned;
+    Vertex(glm::vec3 Posi): Pos(Posi){}
+    Vertex(){}
 };
 
 struct VertInd{
@@ -64,7 +63,6 @@ struct VertSort
 struct Texture{
     unsigned int id;
     std::string type;
-    aiString path;
 };
 
 struct Pair{

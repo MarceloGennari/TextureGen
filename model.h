@@ -3,9 +3,6 @@
 #include <string>
 #include "shader.h"
 #include "mesh.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include "textureengine.h"
 #include "objects.h"
 
@@ -33,8 +30,6 @@ public:
      std::vector<Texture> textures_loaded;
 
      /*  Functions   */
-     void processNode(aiNode *node, const aiScene *scene);
-     Mesh processMesh(aiMesh *mesh, const aiScene *scene);
      unsigned int TextureFromFile(std::vector<Frame *> frames);
 };
 

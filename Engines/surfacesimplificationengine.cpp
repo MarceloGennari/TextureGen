@@ -1,5 +1,5 @@
 #include "textureengine.h"
-
+#include <algorithm>
 
 void TextureEngine::SurfaceSimplificationEngine::Optimize2(std::vector<Vertex> &vs, std::vector<unsigned int> &ind){
     /*

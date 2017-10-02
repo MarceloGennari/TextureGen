@@ -7,7 +7,9 @@ set(HEADER ${HEADER}
          ${CMAKE_CURRENT_SOURCE_DIR}/imageprocessing.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/GLSL/imfragsh.fsh
          ${CMAKE_CURRENT_SOURCE_DIR}/GLSL/imvertsh.vsh
-                 PARENT_SCOPE
+         ${CMAKE_CURRENT_SOURCE_DIR}/parse_stl.h
+         ${CMAKE_CURRENT_SOURCE_DIR}/parse_stl.cpp
+               PARENT_SCOPE
     )
 
 INCLUDE_DIRECTORIES(GLSL)

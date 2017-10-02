@@ -58,10 +58,6 @@ include_directories(Utils)
 # When installing in other PC, keep that in mind and change accordingly
 #########################
 
-include_directories(/home/marcelo/Downloads/assimp-4.0.1/include)
-include_directories(/home/marcelo/Downloads/assimp-4.0.1/build/include)
-LINK_DIRECTORIES(/home/marcelo/Downloads/assimp-4.0.1/build/code)
-
 set(SOURCE ${SOURCE} model.cpp model.h)
 
 ###
@@ -78,6 +74,11 @@ endif(CUDA_FOUND)
 # Using the variable, the system will work solely on CPU code
 ###
 
+SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11")
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_COMPILE_FLAGS}")
+
+add_definitions(${CMAKE_CXX_FLAGS})
+
 if(CUDA_FOUND)
     cuda_add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy} ${poses_teddy} ${frames_teddy_pgm})
 else(CUDA_FOUND)
@@ -89,4 +90,4 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENGL_LIBRARY})
 
 # The X11 and the pthread are included here because of the CImg library
-target_link_libraries(${PROJECT_NAME} libassimp.so libassimp.so.4 X11 pthread)
+target_link_libraries(${PROJECT_NAME} X11 pthread)

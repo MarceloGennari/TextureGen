@@ -12,9 +12,6 @@
 #include "model.h"
 #include "light.h"
 #include "image.h"
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 void render(){
 
@@ -66,8 +63,12 @@ int main(int argc, char *argv[])
     glutIdleFunc(render);
 
 
+    // Testing to implement CUDA in the future
     #ifndef CUDA_NOT_FOUND
         std::cout<< "CUDA: FOUND" << std::endl;
+    #endif
+    #ifdef CUDA_NOT_FOUND
+        std::cout<< "CUDA: NOT FOUND" << std::endl;
     #endif
 
     Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy/mesh.stl");
