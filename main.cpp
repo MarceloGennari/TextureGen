@@ -67,6 +67,16 @@ int main(int argc, char *argv[])
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
+    std::string modelPath;
+    if(argc == 1){
+        std::string root = STR(SOURCE_DIR);
+        modelPath = root + "/Teddy";
+    }
+    if(argc == 2){
+        std::string root = argv[1];
+        modelPath = root;
+    }
+
     // Testing to implement CUDA in the future
     #ifndef CUDA_NOT_FOUND
         std::cout<< "CUDA: FOUND" << std::endl;
@@ -75,7 +85,7 @@ int main(int argc, char *argv[])
         std::cout<< "CUDA: NOT FOUND" << std::endl;
     #endif
 
-    Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy");
+    Model::getModel()->loadModel(modelPath);
 
     glutMainLoop();
     return 0;

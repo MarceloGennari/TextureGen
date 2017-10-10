@@ -74,9 +74,6 @@ endif(CUDA_FOUND)
 # Using the variable, the system will work solely on CPU code
 ###
 
-SET(EXTRA_CXX_COMPILE_FLAGS)
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_COMPILE_FLAGS}")
-
 add_definitions(${CMAKE_CXX_FLAGS})
 
 if(CUDA_FOUND)
