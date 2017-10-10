@@ -24,7 +24,7 @@ namespace stl {
     stl_data(std::string namep) : name(namep) {}
   };
 
-  void parse_stl(const std::string& stl_path, std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
+  void parse_stl(const std::__cxx11::string stl_path, std::vector<Vertex> &vs, std::vector<unsigned int> &ind);
 
 }
 

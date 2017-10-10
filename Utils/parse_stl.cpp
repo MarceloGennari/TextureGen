@@ -23,7 +23,7 @@ namespace stl {
     return Vertex(Pos);
   }
 
-void parse_stl(const std::string& stl_path, std::vector<Vertex> &vs, std::vector<unsigned int> &ind) {
+void parse_stl(const std::string stl_path, std::vector<Vertex> &vs, std::vector<unsigned int> &ind) {
     std::ifstream stl_file(stl_path.c_str(), std::ios::in | std::ios::binary);
     if (!stl_file) {
       std::cout << "ERROR: COULD NOT READ FILE" << std::endl;
@@ -38,10 +38,10 @@ void parse_stl(const std::string& stl_path, std::vector<Vertex> &vs, std::vector
     unsigned int* r = (unsigned int*) n_triangles;
     unsigned int num_triangles = *r;
     for (unsigned int i = 0; i < num_triangles; i++) {
-      auto normal = parse_point(stl_file);
-      auto v1 = parse_point(stl_file);
-      auto v2 = parse_point(stl_file);
-      auto v3 = parse_point(stl_file);
+      Vertex normal = parse_point(stl_file);
+      Vertex v1 = parse_point(stl_file);
+      Vertex v2 = parse_point(stl_file);
+      Vertex v3 = parse_point(stl_file);
       vs.push_back(v1);
       vs.push_back(v2);
       vs.push_back(v3);

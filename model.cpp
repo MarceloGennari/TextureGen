@@ -21,14 +21,16 @@ void Model::Draw(Shader shader){
 
 void Model::loadModel(std::string path){
 
-    directory = path.substr(0, path.find_last_of('/'));
+    directory = path;
 
     // data to fill
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
-    stl::parse_stl("/home/marcelo/TextureGen/Teddy/mesh.stl", vertices, indices);
+    std::string meshPath = directory + "/mesh.stl";
+
+    stl::parse_stl(meshPath, vertices, indices);
 
     /* WHOLE ALGORITHM */
     TextureEngine::SurfaceSimplificationEngine::unRepVert(vertices, indices);

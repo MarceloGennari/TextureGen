@@ -74,7 +74,7 @@ endif(CUDA_FOUND)
 # Using the variable, the system will work solely on CPU code
 ###
 
-SET(EXTRA_CXX_COMPILE_FLAGS "-std=c++11")
+SET(EXTRA_CXX_COMPILE_FLAGS)
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${EXTRA_CXX_COMPILE_FLAGS}")
 
 add_definitions(${CMAKE_CXX_FLAGS})
@@ -85,6 +85,9 @@ else(CUDA_FOUND)
     add_executable(${PROJECT_NAME} ${SRC_LIST} ${SOURCE} ${HEADER} ${frames_teddy} ${poses_teddy} ${frames_teddy_pgm})
     add_definitions(-DCUDA_NOT_FOUND)
 endif(CUDA_FOUND)
+
+# Gets the source directory
+add_definitions(-DSOURCE_DIR=${PROJECT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLUT_LIBRARY})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OPENGL_LIBRARY})

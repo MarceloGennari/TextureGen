@@ -1,3 +1,4 @@
+#include <../model.h>
 #include "camera.h"
 #include <iostream>
 #include <fstream>
@@ -128,7 +129,9 @@ void Camera::mouseInput(int button, int state, int x, int y){
 }
 
 void Camera::initializeCalib(){
-    std::string path = "/home/marcelo/TextureGen/Teddy/calib.txt";
+
+    std::string directory = Model::getModel()->getDirectory();
+    std::string path = directory + "/calib.txt";
     std::string line;
     std::ifstream calibFile(path.c_str());
     std::vector<std::string> array;
@@ -170,9 +173,9 @@ void Camera::getPose(const std::string &frameNr, glm::mat3 &Rot, glm::vec3 &Tra,
      *
      * Also, since it is a Rotation Matrix, it has the property that inverse = transpose
      * */
-
+      std::string directory = Model::getModel()->getDirectory();
       std::string line;
-      std::string path = "/home/marcelo/TextureGen/Teddy/Poses/Pose"+frameNr + ".txt";
+      std::string path = directory + "/Poses/Pose"+frameNr + ".txt";
       std::ifstream pose(path.c_str());
       std::vector<std::string> array;
 

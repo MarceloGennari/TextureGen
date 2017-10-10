@@ -13,14 +13,19 @@
 #include "light.h"
 #include "image.h"
 
+#define XSTR(k) #k
+#define STR(k) XSTR(k)
+
 void render(){
 
     glClearColor(0.9,0.9, 0.9, 1.0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    std::string fragm = "/home/marcelo/TextureGen/Shader/GLSLSources/fragmentshader.fsh";
-    std::string vec = "/home/marcelo/TextureGen/Shader/GLSLSources/vertexshader.fsh";
+    std::string p = std::string(STR(SOURCE_DIR));
+
+    std::string fragm = p+ "/Shader/GLSLSources/fragmentshader.fsh";
+    std::string vec = p+"/Shader/GLSLSources/vertexshader.fsh";
     Shader sh(vec.c_str(), fragm.c_str());
 
     /**********
@@ -62,7 +67,6 @@ int main(int argc, char *argv[])
     glutMouseFunc(Camera::mouseInput);
     glutIdleFunc(render);
 
-
     // Testing to implement CUDA in the future
     #ifndef CUDA_NOT_FOUND
         std::cout<< "CUDA: FOUND" << std::endl;
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
         std::cout<< "CUDA: NOT FOUND" << std::endl;
     #endif
 
-    Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy/mesh.stl");
+    Model::getModel()->loadModel("/home/marcelo/TextureGen/Teddy");
 
     glutMainLoop();
     return 0;

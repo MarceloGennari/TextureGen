@@ -1,6 +1,7 @@
 #include "textureengine.h"
 #include <algorithm>
 #include <sstream>
+#include <../model.h>
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
@@ -13,8 +14,9 @@ std::vector<Frame *> TextureEngine::SaptiotemporalEngine::temporalSampling(int s
      *  4-> Iterate from 2
      * */
 
+    std::string directory = Model::getModel()->getDirectory();
     std::vector<Frame *> frames;
-    std::string root = "/home/marcelo/TextureGen/Teddy/Frames/";
+    std::string root = directory + "/Frames/";
     for(int k = 0; k < nrFrames; k++){
         std::string st, st2;
 

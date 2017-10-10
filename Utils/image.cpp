@@ -7,7 +7,8 @@
 #include <sstream>
 #include <ios>
 
-
+#define XSTR(k) #k
+#define STR(k) XSTR(k)
 
 Image::Image(std::string const &path, std::string const &ppmORpgm)
 {
@@ -127,8 +128,9 @@ void Image::Display(){
     glutInitWindowSize(width, height);
     glutCreateWindow("Image");
     glewInit();
-    std::string vs = "/home/marcelo/TextureGen/Utils/GLSL/imvertsh.vsh";
-    std::string fs = "/home/marcelo/TextureGen/Utils/GLSL/imfragsh.fsh";
+    std::string root = STR(SOURCE_DIR);
+    std::string vs = root + "/Utils/GLSL/imvertsh.vsh";
+    std::string fs = root + "/Utils/GLSL/imfragsh.fsh";
     Shader ourShader(vs.c_str(), fs.c_str());
 
     float vertices[] = {
@@ -215,8 +217,9 @@ void Image::displayGray(){
     glutInitWindowSize(width, height);
     glutCreateWindow("Image Gray");
     glewInit();
-    std::string vs = "/home/marcelo/TextureGen/Utils/GLSL/imvertsh.vsh";
-    std::string fs = "/home/marcelo/TextureGen/Utils/GLSL/imfragsh.fsh";
+    std::string root = STR(SOURCE_DIR);
+    std::string vs = root + "/Utils/GLSL/imvertsh.vsh";
+    std::string fs = root + "/Utils/GLSL/imfragsh.fsh";
     Shader ourShader(vs.c_str(), fs.c_str());
 
     float vertices[] = {

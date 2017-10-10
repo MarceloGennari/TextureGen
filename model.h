@@ -19,7 +19,12 @@ public:
      }
      void Draw(Shader shader);
      void loadModel(std::string path);
+     std::string getDirectory(){
+         return directory;
+     }
+
      std::vector<Mesh> * getMeshes(){return &meshes;}
+
 
  private:
      static Model* m;
